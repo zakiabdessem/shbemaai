@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { AuthMiddleware } from 'middleware/auth.middleware';
 
 @Module({
   imports: [
@@ -13,4 +14,5 @@ import { join } from 'path';
     }),
   ],
 })
-export class GraphqlModule {}
+export class GraphqlModule {
+}

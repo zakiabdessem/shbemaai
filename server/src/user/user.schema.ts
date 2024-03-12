@@ -1,6 +1,6 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { UserRole } from './user.entity';
+import { UserRole } from '../decorator/role.entity';
 
 @ObjectType()
 @Schema({ timestamps: true })
@@ -24,7 +24,7 @@ export class User {
   lastName: string;
 
   @Field()
-  @Prop({ type: String, enum: UserRole, default: UserRole.USER })
+  @Prop({ type: String, enum: UserRole })
   role: UserRole;
 }
 

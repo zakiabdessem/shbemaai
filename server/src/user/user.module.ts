@@ -18,11 +18,10 @@ import { UserResolver } from './user.resolver';
   controllers: [UserController],
   providers: [UserService, UserResolver],
 })
-
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(AuthMiddleware)
-      .forRoutes({ path: 'user/verify', method: RequestMethod.GET });
+      .forRoutes('user/verify');
   }
 }

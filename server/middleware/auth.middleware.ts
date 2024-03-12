@@ -15,7 +15,6 @@ export class AuthMiddleware implements NestMiddleware {
 
       next();
     } catch (e) {
-      console.log(e);
       return res.status(401).json({ auth: false });
     }
   }

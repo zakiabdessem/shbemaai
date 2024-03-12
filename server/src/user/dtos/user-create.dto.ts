@@ -2,19 +2,20 @@ import {
   Contains,
   IsEmail,
   IsEnum,
+  IsIn,
   IsNotEmpty,
   IsString,
   MinLength,
   Validate,
 } from 'class-validator';
-import { UserRole } from '../user.entity';
+import { UserRole } from '../../decorator/role.entity';
 
 import { CustomEmailConstraint } from '../../../util/emailValidator';
 
 export class UserCreateDto {
   @IsEmail()
   @IsNotEmpty()
-  @Validate(CustomEmailConstraint)
+  // @Validate(CustomEmailConstraint)
   email: string;
 
   @IsString()
@@ -30,8 +31,6 @@ export class UserCreateDto {
   @IsNotEmpty()
   lastName: string;
 
-  @IsString()
-  @IsNotEmpty()
-  @IsEnum(UserRole)
+  @IsEnum(UserRole, { each: true })
   role: string;
 }

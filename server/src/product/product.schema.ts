@@ -3,9 +3,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 
 export class Option {
-  @Field(() => ID, { nullable: true })
-  _id?: string;
-
   @Field()
   @Prop()
   name: string;
@@ -45,33 +42,32 @@ export class Option {
   inStock?: boolean;
 }
 
-@ObjectType()
+@ObjectType("Product")
 @Schema({ timestamps: true })
 export class Product {
   @Field(() => ID, { nullable: true })
   _id?: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   name: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   description: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   image: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   price: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   sku: number;
 
-  @Field()
   @Prop({
     required: true,
     ref: 'Category',
@@ -79,30 +75,30 @@ export class Product {
   })
   category: mongoose.Schema.Types.ObjectId;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop()
   weight: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop({
     required: false,
   })
   quantity: number;
 
-  @Field()
+  @Field({ nullable: true })
   @Prop({
     required: false,
   })
   inStock: boolean;
 
-  @Field(() => [Option])
+  // @Field(() => [Option], { nullable: true })
   @Prop({
     type: [Option],
     required: false,
   })
   options: Option[];
 
-  @Field()
+  @Field({ nullable: true })
   @Prop({
     required: false,
     default: true,

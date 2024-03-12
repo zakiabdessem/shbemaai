@@ -20,5 +20,10 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "include": ["src/**/*.ts", "src/types/**/*.d.ts"]
+  "include": [
+    "src/**/*.ts",
+    "src/types/**/*.d.ts",
+    "src/decorator/roles.decorator.ts",
+    "src/decorator/role.entity.ts"
+  ]
 }

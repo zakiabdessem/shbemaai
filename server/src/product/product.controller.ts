@@ -6,12 +6,16 @@ import {
   Param,
   Post,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductCreateDto } from './dtos/product-create.dto';
 import { Response } from 'express';
 import { Category } from 'src/category/category.schema';
 import { CategoryService } from 'src/category/category.service';
+import { Roles } from 'src/decorator/roles.decorator';
+import { UserRole } from 'src/decorator/role.entity';
+import { RolesGuard } from 'src/guard/role.guard';
 
 @Controller('product')
 export class ProductController {
@@ -20,24 +24,24 @@ export class ProductController {
     private readonly categoryService: CategoryService,
   ) {}
 
-  @Post()
+  @Post('create')
+  @Roles(UserRole.READ)
   async create(
     @Body() createProductDto: ProductCreateDto,
     @Res() res: Response,
   ) {
     try {
       const { _id }: Category =
-        await this.categoryService.createProductCategory(
-          {
-            name: createProductDto.category as string,
-          },
-          product._id,
-        );
+        await this.categoryService.createProductCategory({
+          name: createProductDto.category as string,
+        });
 
       const product = await this.prodcutService.create({
         ...createProductDto,
         category: _id,
       });
+
+      await this.categoryService.PushProduct(_id, product._id);
 
       return res.status(HttpStatus.OK).json({ data: product });
     } catch (error) {

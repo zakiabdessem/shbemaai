@@ -26,7 +26,12 @@ async function bootstrap() {
     }),
   );
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production' ? undefined : false,
+    }),
+  );
   app.useGlobalPipes(new ValidationPipe());
 
   await app.listen(process.env.PORT || 8080);

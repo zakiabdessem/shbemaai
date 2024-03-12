@@ -2,7 +2,27 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Category {
+  _id: ID
+  name: String
+  products: [Product!]!
+}
+
+type Product {
+  _id: ID
+  description: String
+  image: String
+  inStock: Boolean
+  name: String
+  price: Float
+  quantity: Float
+  show: Boolean
+  sku: Float
+  weight: Float
+}
+
 type Query {
+  categories: [Category!]!
   users: [User!]!
 }
 

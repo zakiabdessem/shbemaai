@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { Category } from './category.schema';
 import { CategoryCreateDto } from './dtos/category_create.dto';
 
@@ -12,34 +12,36 @@ export class CategoryService {
 
   async createProductCategory(
     createCategoryDto: CategoryCreateDto,
-    product: string,
   ): Promise<Category> {
-    const category = await this.categoryModel.findOneAndUpdate(
-      {
-        name: createCategoryDto.name.toLowerCase(),
-      },
-      {
-        $push: { products: createCategoryDto.products },
-      },
-    );
+    const category = await this.categoryModel.findOne({
+      name: createCategoryDto.name.toLowerCase(),
+    });
 
     if (category) return category;
 
     const newCategory = new this.categoryModel({
       ...createCategoryDto,
       name: createCategoryDto.name.toLowerCase(),
-      products: [...createCategoryDto.products].push(product as any),
     });
 
     return await newCategory.save();
   }
 
   async findAll(): Promise<Category[]> {
+    const categorie: Category[] = await this.categoryModel.find().exec();
+
+    return categorie;
+  }
+
+  async PushProduct(id: ObjectId, productId): Promise<Category> {
     return await this.categoryModel
-      .find()
-      .populate({
-        path: 'products',
+      .findByIdAndUpdate(id, {
+        $push: { products: productId },
       })
       .exec();
+  }
+
+  async findOne(id: string): Promise<Category> {
+    return await this.categoryModel.findById(id).exec();
   }
 }

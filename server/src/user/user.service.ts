@@ -10,8 +10,6 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(createUserDto: UserCreateDto): Promise<User> {
-    if (createUserDto.role) throw new Error('Invalid role provided');
-
     try {
       const newUser = new this.userModel({
         ...createUserDto,
@@ -56,7 +54,7 @@ export class UserService {
       const isPasswordValid = await compare(password, user.password);
       if (!isPasswordValid) throw new Error('Invalid password');
 
-      return user;
+      return user.toJSON() as User;
     } catch (error) {
       throw error;
     }
