@@ -1,0 +1,5 @@
+export const APP_SET_ERROR = "APP_SET_ERROR";
+export const APP_SET_SUCCESS = "APP_SET_SUCCESS";
+
+export const APP_SET_LOADING = "APP_SET_LOADING";
+export const APP_CLEAR_LOADING = "APP_CLEAR_LOADING";
