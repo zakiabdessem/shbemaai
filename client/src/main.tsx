@@ -25,6 +25,7 @@ import { MAIN_DASHBOARD_LOGIN, MAIN_DASHBOARD_URL } from "./app/constants";
 import Products from "./pages/dashboard/products/products";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "./app/ApolloClient";
+import CreateProduct from "./pages/dashboard/products/create";
 
 const App = () => {
   return (
@@ -36,10 +37,15 @@ const App = () => {
 
         {/* Protected routes */}
         <Route element={<ProtectedRoutes />}>
+          <Route path={`admin/`} element={<Dashboard />} />
           <Route path={`${MAIN_DASHBOARD_URL}/`} element={<Dashboard />} />
           <Route
             path={`${MAIN_DASHBOARD_URL}/products`}
             element={<Products />}
+          />
+          <Route
+            path={`${MAIN_DASHBOARD_URL}/products/create`}
+            element={<CreateProduct />}
           />
         </Route>
 

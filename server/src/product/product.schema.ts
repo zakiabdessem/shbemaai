@@ -42,8 +42,12 @@ export class Option {
   inStock?: boolean;
 }
 
-@ObjectType("Product")
-@Schema({ timestamps: true })
+@ObjectType('Product')
+@Schema({
+  timestamps: {
+    createdAt: true,
+  },
+})
 export class Product {
   @Field(() => ID, { nullable: true })
   _id?: string;

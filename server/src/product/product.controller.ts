@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Res,
-  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductCreateDto } from './dtos/product-create.dto';
@@ -53,7 +52,7 @@ export class ProductController {
 
   @Post('count')
   async countDocument(@Body('selectedCategoryId') selectedCategoryId: string) {
-    return await this.prodcutService.countDocument(selectedCategoryId);
+    return await this.prodcutService.countDocument(selectedCategoryId, '');
   }
 
   @Get(':id')

@@ -24,8 +24,8 @@ type Product {
 
 type Query {
   categories: [Category!]!
-  products: [Product!]!
-  productsByCategory(categoryId: String!): [Product!]!
+  products(sortBy: String!): [Product!]!
+  productsByCategory(categoryId: String!, sortBy: String!): [Product!]!
   users: [User!]!
 }
 

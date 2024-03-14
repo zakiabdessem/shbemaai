@@ -15,13 +15,14 @@ export class ProductResolver {
   @Query(() => [Product])
   async productsByCategory(
     @Args('categoryId') categoryId: string,
+    @Args('sortBy') sortBy: string,
   ): Promise<Product[]> {
-    return await this.productService.findAllByCategoryId(categoryId);
+    return await this.productService.findAllByCategoryId(categoryId, sortBy);
   }
 
   @Query(() => [Product])
-  async products() {
-    return this.productService.findAll();
+  async products(@Args('sortBy') sortBy: string): Promise<Product[]> {
+    return this.productService.findAll(sortBy);
   }
 
   @ResolveField('category', () => Category)

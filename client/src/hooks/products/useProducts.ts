@@ -8,6 +8,7 @@ export interface Product {
   _id: string;
   description: string;
   name: string;
+  image: string;
   category: {
     name: string;
   };
@@ -23,11 +24,12 @@ export interface Category {
 }
 
 const GET_DATA_PRODUCTS = gql`
-  query GetData {
-    products {
+  query GetData($sortBy: String!) {
+    products(sortBy: $sortBy) {
       _id
       description
       name
+      image
       category {
         name
       }
@@ -40,11 +42,12 @@ const GET_DATA_PRODUCTS = gql`
 `;
 
 const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
-  query GetData($selectedCategoryId: String!) {
-    productsByCategory(categoryId: $selectedCategoryId) {
+  query GetData($selectedCategoryId: String!, $sortBy: String!) {
+    productsByCategory(categoryId: $selectedCategoryId, sortBy: $sortBy) {
       _id
       description
       name
+      image
       category {
         name
       }
@@ -79,20 +82,31 @@ const useProducts = ({
     refetch: refetchCount,
   } = useCount(selectedCategoryId || "");
 
-  const isCategorySort = sortBy === "category" && selectedCategoryId;
+  const isCategorySort = Boolean(selectedCategoryId);
+  const isDateSort = sortBy === "date";
+  const isStockSort = sortBy === "stock";
+
+  const query = isCategorySort
+    ? GET_DATA_PRODUCTS_BY_CATEGORY
+    : GET_DATA_PRODUCTS;
+  const variables = isCategorySort
+    ? {
+        selectedCategoryId,
+        sortBy: isDateSort ? "date" : isStockSort ? "stock" : "all",
+      }
+    : {
+        sortBy: isDateSort ? "date" : isStockSort ? "stock" : "all",
+      };
 
   const {
     loading: loadingProducts,
     error: errorProducts,
     data: products,
     refetch,
-  } = useQuery(
-    isCategorySort ? GET_DATA_PRODUCTS_BY_CATEGORY : GET_DATA_PRODUCTS,
-    {
-      variables: isCategorySort ? { selectedCategoryId } : {},
-      fetchPolicy: "network-only",
-    }
-  );
+  } = useQuery(query, {
+    variables,
+    fetchPolicy: "network-only",
+  });
 
   const {
     loading: loadingCategories,
@@ -124,7 +138,6 @@ const useProducts = ({
 const useCount = (selectedCategoryId: string) => {
   const [count, setCount] = useState<number>(0);
   const [error, setError] = useState<number>(0);
-  console.log("selectedCategoryId", selectedCategoryId);
 
   const [isLoadingCount, setIsLoadingCount] = useState<boolean>(true);
 

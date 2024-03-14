@@ -20,6 +20,6 @@ export class CategoryResolver {
 
   @ResolveField('products', () => [Product])
   async getProducts(@Parent() category: Category) {
-    return this.productService.findAllByCategoryId(category._id.toString());
+    return this.productService.findAllByCategoryId(category._id.toString(), '');
   }
 }
