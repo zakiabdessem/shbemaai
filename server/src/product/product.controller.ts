@@ -15,7 +15,6 @@ import { Category } from 'src/category/category.schema';
 import { CategoryService } from 'src/category/category.service';
 import { Roles } from 'src/decorator/roles.decorator';
 import { UserRole } from 'src/decorator/role.entity';
-import { RolesGuard } from 'src/guard/role.guard';
 
 @Controller('product')
 export class ProductController {
@@ -25,7 +24,7 @@ export class ProductController {
   ) {}
 
   @Post('create')
-  @Roles(UserRole.READ)
+  @Roles(UserRole.ADMIN)
   async create(
     @Body() createProductDto: ProductCreateDto,
     @Res() res: Response,
@@ -50,6 +49,11 @@ export class ProductController {
         message: 'Internal server error',
       });
     }
+  }
+
+  @Post('count')
+  async countDocument(@Body('selectedCategoryId') selectedCategoryId: string) {
+    return await this.prodcutService.countDocument(selectedCategoryId);
   }
 
   @Get(':id')

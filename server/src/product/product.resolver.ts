@@ -1,4 +1,4 @@
-import { Query, Resolver, ResolveField, Parent } from '@nestjs/graphql';
+import { Query, Resolver, ResolveField, Parent, Args } from '@nestjs/graphql';
 import { Product } from './product.schema';
 import { ProductService } from './product.service';
 import { Category } from 'src/category/category.schema';
@@ -10,6 +10,14 @@ export class ProductResolver {
     private productService: ProductService,
     private categoryService: CategoryService,
   ) {}
+
+  //GET_DATA_PRODUCTS_BY_CATEGORY
+  @Query(() => [Product])
+  async productsByCategory(
+    @Args('categoryId') categoryId: string,
+  ): Promise<Product[]> {
+    return await this.productService.findAllByCategoryId(categoryId);
+  }
 
   @Query(() => [Product])
   async products() {

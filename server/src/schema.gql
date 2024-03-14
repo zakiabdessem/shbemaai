@@ -10,6 +10,7 @@ type Category {
 
 type Product {
   _id: ID
+  category: Category!
   description: String
   image: String
   inStock: Boolean
@@ -23,6 +24,8 @@ type Product {
 
 type Query {
   categories: [Category!]!
+  products: [Product!]!
+  productsByCategory(categoryId: String!): [Product!]!
   users: [User!]!
 }
 

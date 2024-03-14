@@ -21,29 +21,35 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-
-import { useQuery, gql } from "@apollo/client";
-
-const GET_DATA = gql`
-  query GetData {
-    categories {
-      products {
-        description
-      }
-    }
-  }
-`;
+import useProducts, { Category, Product } from "@/hooks/products/useProducts";
+import { useEffect, useState } from "react";
 
 export default function Products() {
-  const { loading, error, data } = useQuery(GET_DATA);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [sortBy, setSortBy] = useState("");
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error :(</p>;
+  const { products, categories, count, refetch } = useProducts({
+    sortBy,
+    selectedCategoryId,
+  });
+
+  const handleReset = () => {
+    setSortBy("");
+    setSelectedCategoryId("");
+  };
+
+  const handleSelectChangeSortCategory = (selectedId: string) => {
+    setSortBy("category");
+    setSelectedCategoryId(selectedId);
+  };
+
+  useEffect(() => {
+    refetch();
+  }, [selectedCategoryId, refetch]);
 
   return (
     <Layout>
-      <TitlePage />
-
+      <TitlePage count={count} />
       <div className="bg-white rounded-md">
         <div className="p-5 flex max-xl:flex-col justify-between">
           <div className="flex items-center p-4">
@@ -56,14 +62,28 @@ export default function Products() {
           <div className="flex max-md:flex-col xl:justify-center xl:items-center p-4">
             <div className="flex items-center mr-2 p-2">
               <label className="font-montserrat text-sm pr-3">Category</label>
-              <Select>
+              <Select
+                onValueChange={(value) => {
+                  if (value === "all") handleReset();
+                  else handleSelectChangeSortCategory(value);
+                }}>
                 <SelectTrigger className="w-[160px]">
                   <SelectValue placeholder="Select a Category" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Categories</SelectLabel>
-                    <SelectItem value="books">Books</SelectItem>
+
+                    <SelectItem key="all" value="all">
+                      All
+                    </SelectItem>
+                    {categories &&
+                      categories.length > 0 &&
+                      categories.map((category: Category) => (
+                        <SelectItem key={category._id} value={category._id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -90,13 +110,13 @@ export default function Products() {
             <Input className="max-w-48" type="search" placeholder="Search" />
           </div>
         </div>
-        <ProductTable />
+        {products && <ProductTable products={products} />}
       </div>
     </Layout>
   );
 }
 
-function ProductTable() {
+function ProductTable({ products }: { products: Product[] }) {
   return (
     <Table>
       <TableCaption className="p-2">
@@ -114,34 +134,46 @@ function ProductTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        <TableRow>
-          <TableCell>
-            <Checkbox />
-          </TableCell>
-          <TableCell>Notebook</TableCell>
-          <TableCell>Books</TableCell>
-          <TableCell>435934636360457</TableCell>
-          <TableCell className="text-left">$250.00</TableCell>
-          <TableCell>In Stock</TableCell>
-          <TableCell className="text-right">
-            <a href={MAIN_WEBSITE_URL}>
-              <img
-                src={asset("icons/dots.png")}
-                className="hover:opacity-50 object-contain min-w-5 h-5"
-                alt="edit"
-              />
-            </a>
-          </TableCell>
-        </TableRow>
+        {products &&
+          products.length > 0 &&
+          products.map((product) => {
+            return (
+              <TableRow key={product._id}>
+                <TableCell>
+                  <Checkbox />
+                </TableCell>
+                <TableCell>{product.name}</TableCell>
+                <TableCell>{product.category.name}</TableCell>
+                <TableCell>{product.sku}</TableCell>
+                <TableCell className="text-left">
+                  ${product.price.toFixed(2)}
+                </TableCell>
+                <TableCell>
+                  {product.quantity
+                    ? product.quantity + " left"
+                    : `${product.inStock ? "In Stock" : "Out of Stock"}`}
+                </TableCell>
+                <TableCell className="text-right">
+                  <a href={MAIN_WEBSITE_URL}>
+                    <img
+                      src={asset("icons/dots.png")}
+                      className="hover:opacity-50 object-contain min-w-5 h-5"
+                      alt="edit"
+                    />
+                  </a>
+                </TableCell>
+              </TableRow>
+            );
+          })}
       </TableBody>
     </Table>
   );
 }
 
-function TitlePage() {
+function TitlePage({ count }: { count: number }) {
   return (
     <h1 className="text-3xl font-semibold text-gray-800 p-5 pt-0 pl-0">
-      Products <span className="text-gray-500">20</span>
+      Products <span className="text-gray-500">{count}</span>
     </h1>
   );
 }

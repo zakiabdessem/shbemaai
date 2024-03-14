@@ -7,10 +7,12 @@ import { CategoryModule } from 'src/category/category.module';
 import { AuthMiddleware } from 'middleware/auth.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/guard/role.guard';
+import { ProductResolver } from './product.resolver';
 
 @Module({
   providers: [
     ProductService,
+    ProductResolver,
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
