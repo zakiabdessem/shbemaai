@@ -7,15 +7,20 @@ import { resolve } from 'path';
 import * as session from 'express-session';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
+import { allowedOrigins } from './config/allowedOrigins';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors({
-    origin: '*',
+  const options = {
+    origin: ['http://localhost:5173', '/chebaani.com$/'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  });
+  };
+  //app.use(cors(options))
+  app.enableCors(options);
   app.use(cookieParser());
 
   app.use(

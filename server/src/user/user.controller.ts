@@ -11,7 +11,7 @@ import {
 import { UserCreateDto } from './dtos/user-create.dto';
 import { Request, Response } from 'express';
 import { sign } from 'jsonwebtoken';
-import cookieConfig from './../../config/cookie';
+import cookieConfig from '../config/cookie';
 import { UserService } from './user.service';
 import { OAuth2Client } from 'google-auth-library';
 import { Roles } from 'src/decorator/roles.decorator';

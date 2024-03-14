@@ -10,7 +10,7 @@ import store from "./redux/Store";
 {
   /* Public Pages */
 }
-import LoginPage from "./pages/auth/loginPage";
+import LoginPage from "./pages/auth/admin/loginPage";
 // import RegisterPage from "./pages/Register";
 
 {
@@ -21,26 +21,41 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import "./index.css";
 import Dashboard from "./pages/dashboard/dashboard";
 import Home from "./pages/Home";
+import { MAIN_DASHBOARD_LOGIN, MAIN_DASHBOARD_URL } from "./app/constants";
+import Products from "./pages/dashboard/products/products";
+import { ApolloProvider } from "@apollo/client";
+import { client } from "./app/ApolloClient";
 
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
+        <Route path={MAIN_DASHBOARD_LOGIN} element={<LoginPage />} />
 
-        {/* Auth routes */}
-        <Route path="/login" element={<LoginPage />} />
-        {/* Protected Refresh Token Routes */}
+        {/* Protected routes */}
         <Route element={<ProtectedRoutes />}>
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path={`${MAIN_DASHBOARD_URL}/`} element={<Dashboard />} />
+          <Route
+            path={`${MAIN_DASHBOARD_URL}/products`}
+            element={<Products />}
+          />
         </Route>
+
+        {/* Redirect/Path for handling unmatched routes */}
+        {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </BrowserRouter>
   );
 };
 
+export default App;
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
-    <App />
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
   </Provider>
 );

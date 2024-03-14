@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "./redux/hooks";
 import { verifyToken } from "./redux/auth/authActions";
 import { RootState } from "./redux/stateTypes";
+import { MAIN_DASHBOARD_LOGIN } from "./app/constants";
 
 const ProtectedRoutes = () => {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const ProtectedRoutes = () => {
 
   if (isLoading) return <div>Loading...</div>;
 
-  if (!isAuthenticated) navigate("/auth/login");
+  if (!isAuthenticated) navigate(MAIN_DASHBOARD_LOGIN);
 
   return <Outlet />;
 };
