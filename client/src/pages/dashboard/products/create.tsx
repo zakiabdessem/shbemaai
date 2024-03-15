@@ -1,6 +1,6 @@
 import Layout from "../Layout";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusIcon, InfoIcon } from "lucide-react";
 import {
   Select,
@@ -118,13 +118,11 @@ const FormSchema = z.object({
   unit: z.coerce.number().min(1),
   weight: z.coerce.number().min(1),
   quantity: z.coerce.number().optional(),
-  options: z.array(OptionSchema).optional(),
 });
 
 export function InputForm() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
-  const [options, setOptions] = useState([{ name: "", image: null }]);
   const [trackInv, setTrackinv] = useState(false);
   const [stockStatus, setStockStatus] = useState("");
 
@@ -149,41 +147,55 @@ export function InputForm() {
       sku: "",
       quantity: 0,
       inStock: false,
-      options: [] as any[],
     },
   });
 
   function onSubmit(data: any) {
     //image upload
+    if (options) data.options = options.filter((option) => option.name !== "");
+    if (!trackInv) data.inStock = stockStatus === "inStock";
 
     console.log(data);
-
-    if (!trackInv) data.inStock = stockStatus == "inStock";
   }
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "options",
-  });
+  interface Option {
+    name: string;
+    image: File | null;
+  }
 
-  const optionsWatch = form.watch("options");
+  const [options, setOptions] = useState<Option[]>([{ name: "", image: null }]);
 
-  const optionsPreview = optionsWatch.map((option: any) => {
-    // Check if option.image is a File object
-    if (option.image instanceof File) {
+  const optionsPreview = options.map((option) => {
+    if (typeof option.image === "string") {
+      return option;
+    }
+    // If option.image is a File, create a new object URL
+    else if (option.image instanceof File) {
+      const objectURL = URL.createObjectURL(option.image);
       return {
         ...option,
-        image: URL.createObjectURL(option.image),
+        image: objectURL,
       };
     } else {
-      // For non-File objects (including null, undefined, or strings), don't attempt to create an object URL
       return option;
     }
   });
 
-  const handleOptionImageChange = (index: number, file: any) => {
-    form.setValue(`options.${index}.image`, file);
+  const handleOptionImageChange = (index: number, file: File) => {
+    const newOptions = [...options];
+    newOptions[index].image = file;
+    setOptions(newOptions);
   };
+
+  useEffect(() => {
+    return () => {
+      options.forEach((option) => {
+        if (typeof option.image === "string") {
+          URL.revokeObjectURL(option.image);
+        }
+      });
+    };
+  }, [options]);
 
   return (
     <Form {...form}>
@@ -448,88 +460,106 @@ export function InputForm() {
                 <div className="grid gap-4 py-4">
                   <div className="flex items-start gap-4">
                     <div className="p-2">
-                      {fields.map((item, index) => (
-                        <div
-                          className="flex flex-col items-start gap-2 py-3"
-                          key={item.id}>
-                          <div className="flex flex-col items-start gap-2">
-                            {/* Option Name Input */}
-                            <Label
-                              htmlFor={`options.${index}.name`}
-                              className="text-right">
-                              Option {index + 1}
-                            </Label>
-                            <Input
-                              id="name"
-                              defaultValue="Pedro Duarte"
-                              className="col-span-3"
-                              {...form.register(`options.${index}.name`)}
-                              placeholder="Option Name"
-                            />
+                      {options.map((item, index) => {
+                        const optionWatch = optionsPreview[index];
+                        // blob the image
+                        if (optionWatch?.image instanceof File) {
+                          try {
+                            optionWatch.image = URL.createObjectURL(
+                              optionWatch.image
+                            );
+                          } catch (error) {
+                            console.error("Error creating object URL:", error);
+                          }
+                        }
 
-                            {/* Image Upload for Option */}
-
-                            <Button>
-                              <input
-                                type="file"
-                                className="hidden"
-                                name={`fileInput-${index}`}
-                                id={`fileInput-${index}`}
+                        return (
+                          <div
+                            className="flex flex-col items-start gap-2 py-3"
+                            key={index}>
+                            <div className="flex flex-col items-start gap-2">
+                              {/* Option Name Input */}
+                              <Label
+                                htmlFor={`options.${index}.name`}
+                                className="text-right">
+                                Option {index + 1}
+                              </Label>
+                              <Input
+                                id="name"
+                                className="col-span-3"
+                                placeholder="Option Name"
+                                value={item.name}
                                 onChange={(e) => {
-                                  if (e.target.files)
-                                    handleOptionImageChange(
-                                      index,
-                                      e.target.files[0]
-                                    );
+                                  const newOptions = [...options];
+                                  newOptions[index].name = e.target.value;
+                                  setOptions(newOptions);
                                 }}
                               />
 
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger>
-                                    <label
-                                      htmlFor={`fileInput-${index}`}
-                                      className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                                      {optionsWatch[index]?.image &&
-                                      optionsWatch[index]?.image.name !== "File"
-                                        ? optionsWatch[index]?.image?.name
-                                        : "Choose an image"}
-                                    </label>
-                                  </TooltipTrigger>
-                                  {optionsWatch[index]?.image && (
-                                    <TooltipContent>
-                                      <img
-                                        src={
-                                          optionsPreview[index]?.image || "a"
-                                        }
-                                        alt="Option Preview"
-                                        style={{
-                                          width: "120px",
-                                          height: "auto",
-                                        }}
-                                      />
-                                    </TooltipContent>
-                                  )}
-                                </Tooltip>
-                              </TooltipProvider>
+                              {/* Image Upload for Option */}
+                              <Button>
+                                <input
+                                  type="file"
+                                  className="hidden"
+                                  name={`fileInput-${index}`}
+                                  id={`fileInput-${index}`}
+                                  onChange={(e) => {
+                                    if (e.target.files)
+                                      handleOptionImageChange(
+                                        index,
+                                        e.target.files[0]
+                                      );
+                                  }}
+                                />
+
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <label
+                                        htmlFor={`fileInput-${index}`}
+                                        className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                        {optionWatch?.image
+                                          ? "Change image"
+                                          : "Choose an image"}
+                                      </label>
+                                    </TooltipTrigger>
+                                    {optionsPreview[index]?.image && (
+                                      <TooltipContent>
+                                        <img
+                                          src={
+                                            optionWatch.image?.toString() || ""
+                                          }
+                                          alt="Option Preview"
+                                          style={{
+                                            width: "120px",
+                                            height: "auto",
+                                          }}
+                                        />
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </Button>
+                            </div>
+
+                            {/* Remove Option Button */}
+                            <Button
+                              variant="destructive"
+                              type="button"
+                              onClick={() => {
+                                const newOptions = [...options];
+                                newOptions.splice(index, 1);
+                                setOptions(newOptions);
+                              }}>
+                              Remove Option
                             </Button>
                           </div>
-
-                          {/* Remove Option Button */}
-                          <Button
-                            variant="destructive"
-                            type="button"
-                            onClick={() => remove(index)}>
-                            Remove Option
-                          </Button>
-                        </div>
-                      ))}
+                        );
+                      })}
                       <Button
                         variant="outline"
                         type="button"
-                        onClick={() =>
-                          append({ name: "", image: File || null })
-                        }>
+                        onClick={() => {}}>
                         Add Option
                       </Button>
                     </div>
