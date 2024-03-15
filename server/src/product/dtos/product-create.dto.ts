@@ -32,11 +32,19 @@ export class ProductCreateDto {
 
   @IsOptional()
   @IsNumber()
+  buisness?: number;
+
+  @IsOptional()
+  @IsNumber()
+  unit?: number;
+
+  @IsOptional()
+  @IsNumber()
   weight?: number;
 
   @IsOptional()
   @IsNumber()
-  sku?: number;
+  sku?: string;
 
   @IsString()
   @IsNotEmpty()
