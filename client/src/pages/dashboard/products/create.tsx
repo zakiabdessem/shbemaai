@@ -118,7 +118,7 @@ const FormSchema = z.object({
   unit: z.coerce.number().min(1),
   weight: z.coerce.number().min(1),
   quantity: z.coerce.number().optional(),
-  options: z.tuple( [ z.string() ] ).rest( z.number() )
+  options: z.array(OptionSchema).optional(),
 });
 
 export function InputForm() {
@@ -149,7 +149,7 @@ export function InputForm() {
       sku: "",
       quantity: 0,
       inStock: false,
-      options: [{ name: "", image: null || File }],
+      options: [] as any[],
     },
   });
 
