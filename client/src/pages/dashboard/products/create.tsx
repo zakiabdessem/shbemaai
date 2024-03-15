@@ -1,6 +1,6 @@
 import Layout from "../Layout";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
-import { PlusIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { PlusIcon, InfoIcon } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -31,6 +31,21 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function CreateProduct() {
   return (
@@ -61,6 +76,21 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/webp",
 ];
 
+const OptionSchema = z.object({
+  name: z.string().min(1, "Option name is required"),
+  image: z
+    .any()
+
+    .refine(
+      (file) => !file || file.size <= MAX_FILE_SIZE,
+      "Max image size is 2MB."
+    )
+    .refine(
+      (file) => !file || ACCEPTED_IMAGE_MIME_TYPES.includes(file.type),
+      "Only .jpg, .jpeg, .png, and .webp formats are supported."
+    ),
+});
+
 const FormSchema = z.object({
   name: z.string().min(2, {
     message: "title must be at least 2 characters.",
@@ -88,12 +118,24 @@ const FormSchema = z.object({
   unit: z.coerce.number().min(1),
   weight: z.coerce.number().min(1),
   quantity: z.coerce.number(),
+  OptionSchema: z.array(OptionSchema),
 });
 
 export function InputForm() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedImages, setSelectedImages] = useState<(File | null)[]>([null]);
+
+  const [options, setOptions] = useState([{ name: "", image: null }]);
   const [trackInv, setTrackinv] = useState(false);
   const [stockStatus, setStockStatus] = useState("");
+
+  const addOption = () => {
+    setOptions([...options, { name: "", image: null }]);
+  };
+
+  const removeOption = (index: number) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
 
   const handleSwitchInvMode = () => {
     setTrackinv(!trackInv);
@@ -110,9 +152,13 @@ export function InputForm() {
       unit: 10,
       weight: 0,
       sku: "",
+      quantity: 0,
       inStock: false,
+      options: [{ name: "", image: null }],
     },
   });
+
+  const formValue = form.getValues();
 
   function onSubmit(data: any) {
     //append trackInv to data
@@ -122,6 +168,34 @@ export function InputForm() {
 
     console.log(data);
   }
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "options",
+  });
+
+  const optionsWatch = form.watch("options");
+
+  const optionsPreview = optionsWatch.map((option: any) => {
+    // Check if option.image is a File object
+    if (option.image instanceof File) {
+      return {
+        ...option,
+        image: URL.createObjectURL(option.image),
+      };
+    } else {
+      // For non-File objects (including null, undefined, or strings), don't attempt to create an object URL
+      return option;
+    }
+  });
+
+  const handleOptionImageChange = (index: number, file: any) => {
+    console.log(file);
+
+    form.setValue(`options.${index}.image`, file);
+    //read form value
+    console.log(formValue);
+  };
 
   return (
     <Form {...form}>
@@ -147,7 +221,6 @@ export function InputForm() {
                       <FormDescription>
                         This is your public product name.
                       </FormDescription>
-
                       <FormMessage />
                     </FormItem>
                   )}
@@ -183,32 +256,33 @@ export function InputForm() {
                 <FormField
                   control={form.control}
                   name="image"
-                  render={({ field }) => (
+                  render={() => (
                     <FormItem className="flex flex-col max-w-64">
                       <FormLabel>Image*</FormLabel>
                       <FormControl>
                         <Button size="lg" type="button">
-                          <input
-                            type="file"
-                            className="hidden"
-                            id="fileInput"
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            onChange={(e) => {
-                              field.onChange(e.target.files);
-                              setSelectedImage(e.target.files?.[0] || null);
-                            }}
-                            ref={field.ref}
-                          />
-                          <label
-                            htmlFor="fileInput"
-                            className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
-                            <span className="whitespace-nowrap">
-                              {selectedImage?.name
-                                ? selectedImage?.name
-                                : "choose your image"}
-                            </span>
-                          </label>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <label
+                                  htmlFor="fileInput"
+                                  className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                  <span className="whitespace-nowrap">
+                                    {selectedImage?.name || "Choose an image"}
+                                  </span>
+                                </label>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {selectedImage && (
+                                  <img
+                                    src={URL.createObjectURL(selectedImage)}
+                                    alt="Preview"
+                                    style={{ width: "120px", height: "auto" }}
+                                  />
+                                )}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </Button>
                       </FormControl>
                       <FormDescription>
@@ -249,30 +323,12 @@ export function InputForm() {
                     render={({ field }) => (
                       <FormItem className="max-w-20">
                         <FormLabel>Business</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="0" {...field} />
-                        </FormControl>
-                        <FormDescription>DA</FormDescription>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  /
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem className="max-w-[73px]">
-                        <FormLabel>Piece</FormLabel>
                         <Popover>
                           <PopoverTrigger>
-                            <img
+                            <InfoIcon
                               className="cursor-pointer relative bottom-1 left-[2px]"
-                              width="10"
-                              height="10"
-                              src="https://img.icons8.com/material-rounded/24/light.png"
-                              alt="light"
+                              width={10}
+                              height={10}
                             />
                           </PopoverTrigger>
                           <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
@@ -289,6 +345,22 @@ export function InputForm() {
                             </div>
                           </PopoverContent>
                         </Popover>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormDescription>DA</FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  /
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem className="max-w-[73px]">
+                        <FormLabel>Piece</FormLabel>
                         <FormControl>
                           <Input type="number" placeholder="10" {...field} />
                         </FormControl>
@@ -349,10 +421,116 @@ export function InputForm() {
               Does your product come in different options, like size, color or
               <span className="block">material? Add them here.</span>
             </p>
-            <Button className="m-3 ml-0" size="sm" color="primary">
-              <PlusIcon className="mr-2" width={16} height={16} />
-              Add Options
-            </Button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="my-4" variant="outline">
+                  <PlusIcon className="mr-2" width={16} height={16} />
+                  Add Options
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className={"lg:max-w-screen-md overflow-y-scroll max-h-screen"}>
+                <DialogHeader>
+                  <DialogTitle>Add product option</DialogTitle>
+                  <DialogDescription>
+                    You'll be able to manage pricing and inventory for this
+                    product option later on.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2">
+                      {fields.map((item, index) => (
+                        <div
+                          className="flex flex-col items-start gap-2 py-3"
+                          key={item.id}>
+                          <div className="flex flex-col items-start gap-2">
+                            {/* Option Name Input */}
+                            <Label
+                              htmlFor={`options.${index}.name`}
+                              className="text-right">
+                              Option {index + 1}
+                            </Label>
+                            <Input
+                              id="name"
+                              defaultValue="Pedro Duarte"
+                              className="col-span-3"
+                              {...form.register(`options.${index}.name`)}
+                              placeholder="Option Name"
+                            />
+
+                            {/* Image Upload for Option */}
+
+                            <Button>
+                              <input
+                                type="file"
+                                className="hidden"
+                                name={`fileInput-${index}`}
+                                id={`fileInput-${index}`}
+                                onChange={(e) => {
+                                  if (e.target.files)
+                                    handleOptionImageChange(
+                                      index,
+                                      e.target.files[0]
+                                    );
+                                }}
+                              />
+
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <label
+                                      htmlFor={`fileInput-${index}`}
+                                      className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                      <span className="whitespace-nowrap">
+                                        {optionsWatch[index]?.image?.name ||
+                                          "choose image"}
+                                      </span>
+                                    </label>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {optionsWatch[index]?.image && (
+                                      <img
+                                        src={
+                                          optionsPreview[index]?.image || "a"
+                                        }
+                                        alt="Option Preview"
+                                        style={{
+                                          width: "120px",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    )}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </Button>
+                          </div>
+
+                          {/* Remove Option Button */}
+                          <Button
+                            variant="destructive"
+                            type="button"
+                            onClick={() => remove(index)}>
+                            Remove Option
+                          </Button>
+                        </div>
+                      ))}
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={() => append({ name: "", image: null })}>
+                        Add Option
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={addOption}>Save changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           <div>
@@ -399,11 +577,9 @@ export function InputForm() {
             )}
           </div>
 
-          <div>
-            <Button type="submit" size="lg" color="primary">
-              Create Product
-            </Button>
-          </div>
+          <Button className="my-5" type="submit" size="lg" color="primary">
+            Create Product
+          </Button>
         </form>
       </div>
     </Form>

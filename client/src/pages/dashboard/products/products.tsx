@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import useProducts, { Category, Product } from "@/hooks/products/useProducts";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
 
 export default function Products() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -79,7 +80,10 @@ export default function Products() {
       <div className="flex justify-between">
         <TitlePage count={count} />
         <a href={`${MAIN_DASHBOARD_URL}/products/create`}>
-          <Button className="bg-primaryGreen">Add product</Button>
+          <Button>
+            <PlusIcon className="mr-2" width={16} height={16} />
+            Add product
+          </Button>
         </a>
       </div>
 
