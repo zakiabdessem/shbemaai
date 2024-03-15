@@ -20,7 +20,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PlusIcon, InfoIcon } from "lucide-react";
 import {
   Select,
@@ -33,6 +33,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -80,7 +81,6 @@ const OptionSchema = z.object({
   name: z.string().min(1, "Option name is required"),
   image: z
     .any()
-
     .refine(
       (file) => !file || file.size <= MAX_FILE_SIZE,
       "Max image size is 2MB."
@@ -117,13 +117,12 @@ const FormSchema = z.object({
   buisness: z.coerce.number().min(1),
   unit: z.coerce.number().min(1),
   weight: z.coerce.number().min(1),
-  quantity: z.coerce.number(),
-  OptionSchema: z.array(OptionSchema),
+  quantity: z.coerce.number().optional(),
+  options: z.tuple( [ z.string() ] ).rest( z.number() )
 });
 
 export function InputForm() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [selectedImages, setSelectedImages] = useState<(File | null)[]>([null]);
 
   const [options, setOptions] = useState([{ name: "", image: null }]);
   const [trackInv, setTrackinv] = useState(false);
@@ -131,10 +130,6 @@ export function InputForm() {
 
   const addOption = () => {
     setOptions([...options, { name: "", image: null }]);
-  };
-
-  const removeOption = (index: number) => {
-    setOptions(options.filter((_, i) => i !== index));
   };
 
   const handleSwitchInvMode = () => {
@@ -154,19 +149,16 @@ export function InputForm() {
       sku: "",
       quantity: 0,
       inStock: false,
-      options: [{ name: "", image: null }],
+      options: [{ name: "", image: null || File }],
     },
   });
 
-  const formValue = form.getValues();
-
   function onSubmit(data: any) {
-    //append trackInv to data
-    if (!trackInv) data.inStock = stockStatus == "inStock";
-
     //image upload
 
     console.log(data);
+
+    if (!trackInv) data.inStock = stockStatus == "inStock";
   }
 
   const { fields, append, remove } = useFieldArray({
@@ -190,11 +182,7 @@ export function InputForm() {
   });
 
   const handleOptionImageChange = (index: number, file: any) => {
-    console.log(file);
-
     form.setValue(`options.${index}.image`, file);
-    //read form value
-    console.log(formValue);
   };
 
   return (
@@ -256,7 +244,7 @@ export function InputForm() {
                 <FormField
                   control={form.control}
                   name="image"
-                  render={() => (
+                  render={({ field }) => (
                     <FormItem className="flex flex-col max-w-64">
                       <FormLabel>Image*</FormLabel>
                       <FormControl>
@@ -264,13 +252,9 @@ export function InputForm() {
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
-                                <label
-                                  htmlFor="fileInput"
-                                  className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                                  <span className="whitespace-nowrap">
-                                    {selectedImage?.name || "Choose an image"}
-                                  </span>
-                                </label>
+                                <div className="w-full text-xs mr-2">
+                                  preview
+                                </div>
                               </TooltipTrigger>
                               <TooltipContent>
                                 {selectedImage && (
@@ -283,6 +267,29 @@ export function InputForm() {
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
+
+                          <input
+                            type="file"
+                            className="hidden"
+                            id="fileInput"
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            onChange={(e) => {
+                              field.onChange(e.target.files);
+                              setSelectedImage(e.target.files?.[0] || null);
+                            }}
+                            ref={field.ref}
+                          />
+
+                          <label
+                            htmlFor="fileInput"
+                            className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
+                            <span className="whitespace-nowrap">
+                              {selectedImage?.name
+                                ? selectedImage?.name
+                                : "choose your image"}
+                            </span>
+                          </label>
                         </Button>
                       </FormControl>
                       <FormDescription>
@@ -483,14 +490,14 @@ export function InputForm() {
                                     <label
                                       htmlFor={`fileInput-${index}`}
                                       className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                                      <span className="whitespace-nowrap">
-                                        {optionsWatch[index]?.image?.name ||
-                                          "choose image"}
-                                      </span>
+                                      {optionsWatch[index]?.image &&
+                                      optionsWatch[index]?.image.name !== "File"
+                                        ? optionsWatch[index]?.image?.name
+                                        : "Choose an image"}
                                     </label>
                                   </TooltipTrigger>
-                                  <TooltipContent>
-                                    {optionsWatch[index]?.image && (
+                                  {optionsWatch[index]?.image && (
+                                    <TooltipContent>
                                       <img
                                         src={
                                           optionsPreview[index]?.image || "a"
@@ -501,8 +508,8 @@ export function InputForm() {
                                           height: "auto",
                                         }}
                                       />
-                                    )}
-                                  </TooltipContent>
+                                    </TooltipContent>
+                                  )}
                                 </Tooltip>
                               </TooltipProvider>
                             </Button>
@@ -520,14 +527,18 @@ export function InputForm() {
                       <Button
                         variant="outline"
                         type="button"
-                        onClick={() => append({ name: "", image: null })}>
+                        onClick={() =>
+                          append({ name: "", image: File || null })
+                        }>
                         Add Option
                       </Button>
                     </div>
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button onClick={addOption}>Save changes</Button>
+                  <DialogClose>
+                    <Button onClick={addOption}>Save changes</Button>
+                  </DialogClose>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
