@@ -48,6 +48,10 @@ const App = () => {
             path={`${MAIN_DASHBOARD_URL}/products/create`}
             element={<CreateProduct />}
           />
+          <Route
+            path={`${MAIN_DASHBOARD_URL}/products/:id`}
+            element={<EditProduct />}
+          />
         </Route>
 
         {/* Redirect/Path for handling unmatched routes */}
@@ -60,7 +64,6 @@ const App = () => {
 export default App;
 
 const queryClient = new QueryClient();
-
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>

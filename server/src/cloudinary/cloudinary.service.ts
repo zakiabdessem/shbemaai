@@ -1,6 +1,5 @@
 import { UploadApiResponse, UploadApiErrorResponse } from 'cloudinary';
 import { v2 } from 'cloudinary';
-import { Stream } from 'stream';
 
 export class CloudinaryService {
   async uploadImage(
