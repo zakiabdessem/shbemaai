@@ -47,14 +47,114 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
+import useCategories from "@/hooks/categories/useCategories";
+import { useCreateProduct } from "@/hooks/products/useCreateProduct";
+import { useDispatch } from "@/redux/hooks";
+import { Option } from "@/types/product";
+import { Dispatch } from "redux";
 
 function CreateProduct() {
+  const dispatch = useDispatch();
+
+  const { data } = useCategories();
+
+  const [show, setShow] = useState(true);
+  const [promote, setPromote] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState("");
+
   return (
     <Layout>
       <TitlePage />
-      <div className="bg-white rounded-md">
-        <div className="p-5 flex max-xl:flex-col justify-between">
-          <InputForm />
+      <div className="flex max-lg:flex-col gap-2">
+        <div className="bg-white rounded-md lg:w-5/6">
+          <div className="p-5 flex max-xl:flex-col justify-between">
+            <InputForm
+              dispatch={dispatch}
+              show={show}
+              promote={promote}
+              categories={categories}
+              category={category}
+              setCategory={setCategory}
+            />
+          </div>
+        </div>
+        <div className="lg:w-1/3">
+          <div className="bg-white rounded-md p-2 h-fit mb-2">
+            <div className="p-5 flex flex-col max-xl:flex-col justify-between gap-6">
+              <h2 className="font-montserrat font-semibold p-2 pt-0 px-0 border-b-[1px] mb-2">
+                Options
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={show}
+                  onClick={() => setShow(!show)}
+                  id="show"
+                />
+                <label
+                  htmlFor="show"
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Show in store
+                </label>
+              </div>
+              <div className="flex items-center space-x-2 pb-2">
+                <Checkbox
+                  checked={promote}
+                  onClick={() => setPromote(!promote)}
+                  id="promote"
+                />
+                <label
+                  htmlFor="promote"
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Promote this product
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-md p-2 h-fit">
+            <div className="p-5 flex flex-col max-xl:flex-col justify-between gap-6">
+              <h2 className="font-montserrat font-semibold p-2 pt-0 px-0 border-b-[1px] mb-2">
+                Categories
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="show" checked disabled />
+                <label
+                  htmlFor="show"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  All Categories
+                </label>
+              </div>
+              {data?.categories.map((category: any) => (
+                <div className="flex items-center space-x-1" key={category._id}>
+                  <Checkbox
+                    id={category._id}
+                    onClick={() => {
+                      if (categories.includes(category._id)) {
+                        setCategories(
+                          categories.filter((c) => c !== category._id)
+                        );
+                      } else {
+                        setCategories([...categories, category._id]);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={category._id}
+                    className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {category.name}
+                  </label>
+                </div>
+              ))}
+              <Input
+                type="text"
+                placeholder="Add new category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                maxLength={70}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </Layout>
@@ -77,32 +177,16 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/webp",
 ];
 
-const OptionSchema = z.object({
-  name: z.string().min(1, "Option name is required"),
-  image: z
-    .any()
-    .refine(
-      (file) => !file || file.size <= MAX_FILE_SIZE,
-      "Max image size is 2MB."
-    )
-    .refine(
-      (file) => !file || ACCEPTED_IMAGE_MIME_TYPES.includes(file.type),
-      "Only .jpg, .jpeg, .png, and .webp formats are supported."
-    ),
-});
-
 const FormSchema = z.object({
   name: z.string().min(2, {
     message: "title must be at least 2 characters.",
   }),
   description: z
     .string()
-    .min(2, {
-      message: "description must be at least 2 characters.",
+    .max(516, {
+      message: "description must be at most 516 characters.",
     })
-    .max(272, {
-      message: "description must be at most 272 characters.",
-    }),
+    .optional(),
   image: z
     .any()
     .refine((files) => {
@@ -120,19 +204,31 @@ const FormSchema = z.object({
   quantity: z.coerce.number().optional(),
 });
 
-export function InputForm() {
+export function InputForm({
+  show,
+  promote,
+  categories,
+  dispatch,
+  category,
+}: {
+  show: boolean;
+  promote: boolean;
+  categories: string[];
+  dispatch: Dispatch;
+  category?: string;
+  setCategory?: (category: string) => void;
+}) {
+  const createProductMutation = useCreateProduct();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const [trackInv, setTrackinv] = useState(false);
-  const [stockStatus, setStockStatus] = useState("");
+  const [stockStatus, setStockStatus] = useState("inStock");
 
-  const addOption = () => {
-    setOptions([...options, { name: "", image: null }]);
-  };
+  const [options, setOptions] = useState<Option[]>([{ name: "", image: null }]);
 
-  const handleSwitchInvMode = () => {
-    setTrackinv(!trackInv);
-  };
+  const addOption = () => setOptions([...options, { name: "", image: null }]);
+
+  const handleSwitchInvMode = () => setTrackinv(!trackInv);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -149,21 +245,6 @@ export function InputForm() {
       inStock: false,
     },
   });
-
-  function onSubmit(data: any) {
-    //image upload
-    if (options) data.options = options.filter((option) => option.name !== "");
-    if (!trackInv) data.inStock = stockStatus === "inStock";
-
-    console.log(data);
-  }
-
-  interface Option {
-    name: string;
-    image: File | null;
-  }
-
-  const [options, setOptions] = useState<Option[]>([{ name: "", image: null }]);
 
   const optionsPreview = options.map((option) => {
     if (typeof option.image === "string") {
@@ -186,6 +267,44 @@ export function InputForm() {
     newOptions[index].image = file;
     setOptions(newOptions);
   };
+
+  function onSubmit(data: any) {
+    console.log("data", data);
+    dispatch({
+      type: "APP_SET_LOADING",
+    });
+
+    data.show = show;
+    data.promote = promote;
+    data.categories = categories;
+    data.category = category;
+
+    //image upload
+    if (options) data.options = options.filter((option) => option.name !== "");
+    if (!trackInv) data.inStock = stockStatus === "inStock";
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      data.image = event?.target?.result;
+
+      // Once image reading is complete, do the same for option images
+      if (data.options.length === 0) createProductMutation.mutateAsync(data);
+      data.options.forEach((option: any) => {
+        const optionReader = new FileReader();
+        optionReader.onload = function (event) {
+          option.image = event?.target?.result;
+
+          // Check if all option images have been read before mutating
+          const allOptionImagesRead = data.options.every(
+            (opt: any) => opt.image !== undefined
+          );
+          if (allOptionImagesRead) createProductMutation.mutateAsync(data);
+        };
+        if (option.image) optionReader.readAsDataURL(option.image);
+      });
+    };
+    reader.readAsDataURL(data.image[0]);
+  }
 
   useEffect(() => {
     return () => {
@@ -216,7 +335,11 @@ export function InputForm() {
                     <FormItem>
                       <FormLabel>Product*</FormLabel>
                       <FormControl>
-                        <Input placeholder="Untilted Product" {...field} />
+                        <Input
+                          placeholder="Untilted Product"
+                          maxLength={150}
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         This is your public product name.
@@ -238,6 +361,7 @@ export function InputForm() {
                       <FormControl>
                         <Textarea
                           placeholder="eg This is cool product"
+                          maxLength={516}
                           {...field}
                         />
                       </FormControl>
@@ -261,25 +385,6 @@ export function InputForm() {
                       <FormLabel>Image*</FormLabel>
                       <FormControl>
                         <Button size="lg" type="button">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger>
-                                <div className="w-full text-xs mr-2">
-                                  preview
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {selectedImage && (
-                                  <img
-                                    src={URL.createObjectURL(selectedImage)}
-                                    alt="Preview"
-                                    style={{ width: "120px", height: "auto" }}
-                                  />
-                                )}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-
                           <input
                             type="file"
                             className="hidden"
@@ -305,7 +410,7 @@ export function InputForm() {
                         </Button>
                       </FormControl>
                       <FormDescription>
-                        2 mb max, PNG, JPG, JPEG
+                        2mb max, PNG, JPG, JPEG, WEBP
                       </FormDescription>
 
                       <FormMessage />
@@ -559,7 +664,7 @@ export function InputForm() {
                       <Button
                         variant="outline"
                         type="button"
-                        onClick={() => {}}>
+                        onClick={addOption}>
                         Add Option
                       </Button>
                     </div>
@@ -567,7 +672,7 @@ export function InputForm() {
                 </div>
                 <DialogFooter>
                   <DialogClose>
-                    <Button onClick={addOption}>Save changes</Button>
+                    <Button>Save changes</Button>
                   </DialogClose>
                 </DialogFooter>
               </DialogContent>
@@ -593,7 +698,7 @@ export function InputForm() {
                 <Select onValueChange={(value) => setStockStatus(value)}>
                   <Label>Status</Label>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Status" />
+                    <SelectValue placeholder="inStock" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="inStock">InStock</SelectItem>

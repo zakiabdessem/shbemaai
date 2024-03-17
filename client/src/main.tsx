@@ -26,6 +26,7 @@ import Products from "./pages/dashboard/products/products";
 import { ApolloProvider } from "@apollo/client";
 import { client } from "./app/ApolloClient";
 import CreateProduct from "./pages/dashboard/products/create";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 const App = () => {
   return (
@@ -58,10 +59,15 @@ const App = () => {
 
 export default App;
 
+const queryClient = new QueryClient();
+
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <ApolloProvider client={client}>
-      <App />
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
     </ApolloProvider>
   </Provider>
 );

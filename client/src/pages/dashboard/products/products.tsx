@@ -212,8 +212,8 @@ function ProductTable({
                     alt=""
                   />
                 </TableCell>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.category.name}</TableCell>
+                <TableCell className="w-60">{product.name}</TableCell>
+                <TableCell>{product.categories[0]?.name || "-"}</TableCell>
                 <TableCell className="font-medium text-gray-400">
                   {product.sku}
                 </TableCell>

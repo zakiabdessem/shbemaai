@@ -8,6 +8,7 @@ import { AuthMiddleware } from 'middleware/auth.middleware';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/guard/role.guard';
 import { ProductResolver } from './product.resolver';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
   providers: [
@@ -22,6 +23,7 @@ import { ProductResolver } from './product.resolver';
   imports: [
     MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]),
     CategoryModule,
+    CloudinaryModule,
   ],
   exports: [ProductService],
 })

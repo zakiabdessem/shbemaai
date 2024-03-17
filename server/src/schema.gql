@@ -10,15 +10,18 @@ type Category {
 
 type Product {
   _id: ID
-  category: Category!
+  business: Float
+  categories: [Category!]!
   description: String
   image: String
   inStock: Boolean
   name: String
   price: Float
+  promote: Boolean
   quantity: Float
   show: Boolean
-  sku: Float
+  sku: String
+  unit: Float
   weight: Float
 }
 

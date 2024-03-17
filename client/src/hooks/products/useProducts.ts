@@ -3,15 +3,16 @@ import { useQuery, gql } from "@apollo/client";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { API_URL } from "@/app/constants";
+import useCategories from "../categories/useCategories";
 
 export interface Product {
   _id: string;
   description: string;
   name: string;
   image: string;
-  category: {
+  categories: {
     name: string;
-  };
+  }[];
   sku: number;
   price: number;
   quantity: number;
@@ -30,7 +31,7 @@ const GET_DATA_PRODUCTS = gql`
       description
       name
       image
-      category {
+      categories {
         name
       }
       sku
@@ -48,7 +49,7 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
       description
       name
       image
-      category {
+      categories {
         name
       }
       sku
@@ -59,14 +60,6 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
   }
 `;
 
-const GET_DATA_CATEGORIES = gql`
-  {
-    categories {
-      _id
-      name
-    }
-  }
-`;
 
 const useProducts = ({
   sortBy,
@@ -112,7 +105,7 @@ const useProducts = ({
     loading: loadingCategories,
     error: errorCategories,
     data: categories,
-  } = useQuery(GET_DATA_CATEGORIES);
+  } = useCategories();
 
   if (errorProducts || errorCount || errorCategories)
     toast.error("Error fetching products", {

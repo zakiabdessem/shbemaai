@@ -15,6 +15,10 @@ export class ProductService {
   async create(CategoryCreateDto: ProductCreateDto): Promise<Product> {
     const newProduct = new this.productModel(CategoryCreateDto);
 
+    CategoryCreateDto.categories.forEach(async (category) => {
+      await this.categoryService.PushProduct(category, newProduct._id);
+    });
+
     return await newProduct.save();
   }
 
@@ -36,28 +40,26 @@ export class ProductService {
     return await this.productModel.findById(id);
   }
 
-  async findAllByCategoryId(id: string, sortBy: string): Promise<Product[]> {
-    //check if valid mongoID
-    const isValid = mongoose.Types.ObjectId.isValid(id);
-    if (!isValid) return [];
+  async findAllByCategoryId(categoryId: string, sortBy: string): Promise<Product[]> {
+    // Check if valid mongoID
+    if (!mongoose.Types.ObjectId.isValid(categoryId))
+        return [];
 
-    if (!sortBy) return await this.productModel.find({ category: id }).exec();
+    const query = { categories: categoryId };
+    let sortQuery = {};
 
-    if (sortBy == 'stock')
-      return await this.productModel
-        .find({
-          category: id,
-          $or: [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }],
-        })
-        .sort({ inStock: -1, quantity: -1 })
-        .exec();
+    // Define sort options
+    if (sortBy === 'stock') {
+        query['$or'] = [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }];
+        sortQuery = { inStock: -1, quantity: -1 };
+    } else {
+        sortQuery = { createdAt: -1 };
+    }
 
-    //sort by createdAt
-    return await this.productModel
-      .find({ category: id })
-      .sort({ createdAt: -1 })
-      .exec();
-  }
+    // Execute query
+    return await this.productModel.find(query).sort(sortQuery).exec();
+}
+
 
   async countDocument(selectedCategoryId: string, sortBy: string) {
     if (selectedCategoryId) {

@@ -69,15 +69,8 @@ export class Product {
   price: number;
 
   @Field({ nullable: true })
-  @Prop()
-  sku: number;
-
-  @Prop({
-    required: true,
-    ref: 'Category',
-    type: mongoose.Schema.Types.ObjectId,
-  })
-  category: mongoose.Schema.Types.ObjectId;
+  @Prop({ required: false })
+  sku: string;
 
   @Field({ nullable: true })
   @Prop()
@@ -108,6 +101,32 @@ export class Product {
     default: true,
   })
   show: boolean;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+    default: false,
+  })
+  promote: boolean;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+  })
+  business: number;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+  })
+  unit: number;
+
+  @Prop({
+    required: false,
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Category',
+  })
+  categories: (Types.ObjectId | string)[];
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);

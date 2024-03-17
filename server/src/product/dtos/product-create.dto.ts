@@ -1,12 +1,10 @@
 import {
   IsArray,
   IsBoolean,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
 
 import { Option } from '../product.schema';
@@ -17,9 +15,8 @@ export class ProductCreateDto {
   @IsNotEmpty()
   name: string;
 
-  @IsString()
   @IsOptional()
-  @MinLength(6)
+  @IsString()
   description?: string;
 
   @IsString()
@@ -43,12 +40,9 @@ export class ProductCreateDto {
   weight?: number;
 
   @IsOptional()
-  @IsNumber()
   sku?: string;
 
-  @IsString()
-  @IsNotEmpty()
-  category: mongoose.Schema.Types.ObjectId | string;
+  category?: mongoose.Schema.Types.ObjectId | string;
 
   @IsOptional()
   @IsNumber()
@@ -61,4 +55,18 @@ export class ProductCreateDto {
   @IsOptional()
   @IsArray()
   options?: Option[];
+
+  @IsOptional()
+  @IsBoolean()
+  promote?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  show?: boolean;
+
+  @IsOptional()
+  @IsArray({
+    message: 'Categories must be an array of ObjectId',
+  })
+  categories?: (Types.ObjectId | string)[];
 }

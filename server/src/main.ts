@@ -8,6 +8,7 @@ import * as session from 'express-session';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { allowedOrigins } from './config/allowedOrigins';
+import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -22,6 +23,9 @@ async function bootstrap() {
   //app.use(cors(options))
   app.enableCors(options);
   app.use(cookieParser());
+
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   app.use(
     session({

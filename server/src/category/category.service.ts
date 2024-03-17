@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { Model, ObjectId, Types } from 'mongoose';
 import { Category } from './category.schema';
 import { CategoryCreateDto } from './dtos/category_create.dto';
 
@@ -33,7 +33,14 @@ export class CategoryService {
     return categorie;
   }
 
-  async PushProduct(id: ObjectId, productId): Promise<Category> {
+  async findAllById(categories): Promise<Category[]> {
+    return await this.categoryModel.find({ _id: { $in: categories } }).exec();
+  }
+
+  async PushProduct(
+    id: Types.ObjectId | string,
+    productId: Types.ObjectId | string,
+  ): Promise<Category> {
     return await this.categoryModel
       .findByIdAndUpdate(id, {
         $push: { products: productId },

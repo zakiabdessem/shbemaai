@@ -25,8 +25,8 @@ export class ProductResolver {
     return this.productService.findAll(sortBy);
   }
 
-  @ResolveField('category', () => Category)
+  @ResolveField('categories', () => [Category])
   async getCategory(@Parent() product: Product) {
-    return this.categoryService.findOne(product.category.toString());
+    return this.categoryService.findAllById(product.categories);
   }
 }

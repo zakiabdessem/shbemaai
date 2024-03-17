@@ -14,12 +14,19 @@ import { Category } from 'src/category/category.schema';
 import { CategoryService } from 'src/category/category.service';
 import { Roles } from 'src/decorator/roles.decorator';
 import { UserRole } from 'src/decorator/role.entity';
+import { InjectModel } from '@nestjs/mongoose';
+import { Product } from './product.schema';
+import { Model } from 'mongoose';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import * as _ from 'lodash';
 
 @Controller('product')
 export class ProductController {
   constructor(
+    @InjectModel(Product.name) private productModel: Model<Product>,
     private readonly prodcutService: ProductService,
     private readonly categoryService: CategoryService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   @Post('create')
@@ -29,19 +36,58 @@ export class ProductController {
     @Res() res: Response,
   ) {
     try {
-      const { _id }: Category =
-        await this.categoryService.createProductCategory({
+      if (
+        createProductDto.categories.length === 0 &&
+        !createProductDto.category
+      )
+        return res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: 'Categories are required' });
+
+      // Upload main product image
+      const { url } = await this.cloudinaryService.uploadImage(
+        createProductDto.image,
+      );
+      createProductDto.image = url;
+
+      const newProduct = new this.productModel(createProductDto);
+
+      // Handle category logic
+      if (
+        createProductDto.category &&
+        !createProductDto.categories.includes(
+          createProductDto.category.toString(),
+        )
+      ) {
+        const newCategory = await this.categoryService.createProductCategory({
           name: createProductDto.category as string,
         });
+        newProduct.categories.push(newCategory._id.toString());
+      }
 
-      const product = await this.prodcutService.create({
-        ...createProductDto,
-        category: _id,
-      });
+      // Push product to categories
+      await Promise.all(
+        newProduct.categories.map(async (category) => {
+          await this.categoryService.PushProduct(category, newProduct._id);
+        }),
+      );
 
-      await this.categoryService.PushProduct(_id, product._id);
+      // Upload option images and update URLs
+      await Promise.all(
+        createProductDto.options.map(async (option, index) => {
+          //option.image maybe empty object
+          if (!_.isEmpty(option.image) && option.image) {
+            const { url } = await this.cloudinaryService.uploadImage(
+              option.image,
+            );
+            newProduct.options[index].image = url;
+          }
+        }),
+      );
 
-      return res.status(HttpStatus.OK).json({ data: product });
+      await newProduct.save();
+
+      return res.status(HttpStatus.OK).json({ data: newProduct });
     } catch (error) {
       console.log(error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
