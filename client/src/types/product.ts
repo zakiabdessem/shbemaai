@@ -5,6 +5,6 @@ export interface Category {
 
 export interface Option {
   name: string;
-  image: File | null;
+  image: File | string | null;
+  changed: boolean;
 }
-

@@ -96,6 +96,82 @@ export class ProductController {
     }
   }
 
+  @Post('edit')
+  @Roles(UserRole.ADMIN)
+  async edit(@Body() editProductDto: ProductCreateDto, @Res() res: Response) {
+    try {
+      if (editProductDto.categories.length === 0 && !editProductDto.category)
+        return res
+          .status(HttpStatus.BAD_REQUEST)
+          .json({ message: 'Categories are required' });
+
+      // Upload main product image
+      if (
+        editProductDto.image &&
+        !editProductDto.image.includes('cloudinary')
+      ) {
+        const { url } = await this.cloudinaryService.uploadImage(
+          editProductDto.image,
+        );
+        editProductDto.image = url;
+      }
+
+      const product = await this.prodcutService.edit(editProductDto);
+
+      // Handle category logic
+      if (
+        editProductDto.category &&
+        !editProductDto.categories.includes(editProductDto.category.toString())
+      ) {
+        const newCategory = await this.categoryService.createProductCategory({
+          name: editProductDto.category as string,
+        });
+        product.categories.push(newCategory._id.toString());
+      }
+
+      // Push product to categories
+      await Promise.all(
+        product.categories.map(async (category) => {
+          await this.categoryService.PushProduct(category, product._id);
+        }),
+      );
+
+      // Upload option images and update URLs
+      await Promise.all(
+        editProductDto.options.map(async (option, index) => {
+          //option.image maybe empty object
+          if (
+            !_.isEmpty(option.image) &&
+            option.image &&
+            !option.image.includes('cloudinary') &&
+            option.changed
+          ) {
+            const { url } = await this.cloudinaryService.uploadImage(
+              option.image,
+            );
+            product.options[index].image = url;
+          }
+
+          if (option.image && !option.image.includes('cloudinary')) {
+            const { url } = await this.cloudinaryService.uploadImage(
+              option.image,
+            );
+            product.options[index].image = url;
+          }
+        }),
+      );
+
+      await this.prodcutService.edit(editProductDto);
+
+      return res.status(HttpStatus.OK).json({ data: product });
+    } catch (error) {
+      console.log(error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Internal server error',
+      });
+    }
+  }
+
   @Post('count')
   async countDocument(@Body('selectedCategoryId') selectedCategoryId: string) {
     return await this.prodcutService.countDocument(selectedCategoryId, '');

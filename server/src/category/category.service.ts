@@ -48,6 +48,17 @@ export class CategoryService {
       .exec();
   }
 
+  async PullProduct(
+    id: Types.ObjectId | string,
+    productId: Types.ObjectId | string,
+  ): Promise<Category> {
+    return await this.categoryModel
+      .findByIdAndUpdate(id, {
+        $pull: { products: productId },
+      })
+      .exec();
+  }
+
   async findOne(id: string): Promise<Category> {
     return await this.categoryModel.findById(id).exec();
   }

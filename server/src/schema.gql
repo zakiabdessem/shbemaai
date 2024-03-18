@@ -16,6 +16,7 @@ type Product {
   image: String
   inStock: Boolean
   name: String
+  options: [options!]
   price: Float
   promote: Boolean
   quantity: Float
@@ -27,6 +28,7 @@ type Product {
 
 type Query {
   categories: [Category!]!
+  product(id: String!): Product!
   products(sortBy: String!): [Product!]!
   productsByCategory(categoryId: String!, sortBy: String!): [Product!]!
   users: [User!]!
@@ -38,4 +40,15 @@ type User {
   firstName: String!
   lastName: String!
   role: String!
+}
+
+type options {
+  description: String!
+  image: String!
+  inStock: Boolean!
+  name: String!
+  price: Float!
+  quantity: Float!
+  sku: Boolean!
+  wieght: Float!
 }

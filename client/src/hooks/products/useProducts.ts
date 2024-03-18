@@ -4,19 +4,24 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { API_URL } from "@/app/constants";
 import useCategories from "../categories/useCategories";
+import { Option } from "@/types/product";
 
 export interface Product {
   _id: string;
   description: string;
   name: string;
-  image: string;
+  image: string | null | "";
   categories: {
     name: string;
   }[];
-  sku: number;
+  sku: string;
   price: number;
   quantity: number;
   inStock: boolean;
+  business: number;
+  unit: number;
+  weight: number;
+  options: Option[];
 }
 
 export interface Category {
@@ -60,6 +65,48 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
   }
 `;
 
+const GET_DATA_PRODUCT = gql`
+  query GetData($productId: String!) {
+    product(id: $productId) {
+      _id
+      name
+      description
+      image
+      categories {
+        name
+      }
+      business
+      unit
+      weight
+      sku
+      price
+      quantity
+      inStock
+      options{
+        name
+        image
+      }
+    }
+  }
+`;
+
+const useProduct = (productId: string) => {
+  const query = GET_DATA_PRODUCT;
+
+  const { error: errorProduct, data: product } = useQuery(query, {
+    variables: {
+      productId,
+    },
+    fetchPolicy: "network-only",
+  });
+
+  if (errorProduct)
+    toast.error("Error fetching product", {
+      position: "bottom-right",
+    });
+
+  return product?.product;
+};
 
 const useProducts = ({
   sortBy,
@@ -161,4 +208,4 @@ const useCount = (selectedCategoryId: string) => {
   return { count, isLoadingCount, error, refetch: fetch };
 };
 
-export default useProducts;
+export { useProducts, useProduct };

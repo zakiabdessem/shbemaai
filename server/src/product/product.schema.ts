@@ -2,7 +2,9 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 
+@ObjectType('options')
 export class Option {
+  changed: boolean;
   @Field()
   @Prop()
   name: string;
@@ -88,7 +90,7 @@ export class Product {
   })
   inStock: boolean;
 
-  // @Field(() => [Option], { nullable: true })
+  @Field(() => [Option], { nullable: true })
   @Prop({
     type: [Option],
     required: false,

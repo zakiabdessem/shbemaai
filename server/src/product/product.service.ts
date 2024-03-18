@@ -15,11 +15,24 @@ export class ProductService {
   async create(CategoryCreateDto: ProductCreateDto): Promise<Product> {
     const newProduct = new this.productModel(CategoryCreateDto);
 
-    CategoryCreateDto.categories.forEach(async (category) => {
-      await this.categoryService.PushProduct(category, newProduct._id);
-    });
+    await Promise.all(
+      CategoryCreateDto.categories.map(async (category) => {
+        await this.categoryService.PushProduct(category, newProduct._id);
+      }),
+    );
 
     return await newProduct.save();
+  }
+
+  async edit(CategoryCreateDto: ProductCreateDto): Promise<Product> {
+    const product = await this.findOne(CategoryCreateDto._id);
+    if (!product) return null;
+
+    return await this.productModel
+      .findByIdAndUpdate(CategoryCreateDto._id, CategoryCreateDto, {
+        new: true,
+      })
+      .exec();
   }
 
   async findAll(sortBy: string): Promise<Product[]> {
@@ -40,26 +53,30 @@ export class ProductService {
     return await this.productModel.findById(id);
   }
 
-  async findAllByCategoryId(categoryId: string, sortBy: string): Promise<Product[]> {
+  async findAllByCategoryId(
+    categoryId: string,
+    sortBy: string,
+  ): Promise<Product[]> {
     // Check if valid mongoID
-    if (!mongoose.Types.ObjectId.isValid(categoryId))
-        return [];
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) return [];
 
     const query = { categories: categoryId };
     let sortQuery = {};
 
     // Define sort options
     if (sortBy === 'stock') {
-        query['$or'] = [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }];
-        sortQuery = { inStock: -1, quantity: -1 };
+      query['$or'] = [
+        { inStock: true },
+        { quantity: { $exists: true, $ne: 0 } },
+      ];
+      sortQuery = { inStock: -1, quantity: -1 };
     } else {
-        sortQuery = { createdAt: -1 };
+      sortQuery = { createdAt: -1 };
     }
 
     // Execute query
     return await this.productModel.find(query).sort(sortQuery).exec();
-}
-
+  }
 
   async countDocument(selectedCategoryId: string, sortBy: string) {
     if (selectedCategoryId) {

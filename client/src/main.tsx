@@ -27,6 +27,7 @@ import { ApolloProvider } from "@apollo/client";
 import { client } from "./app/ApolloClient";
 import CreateProduct from "./pages/dashboard/products/create";
 import { QueryClient, QueryClientProvider } from "react-query";
+import EditProduct from "./pages/dashboard/products/edit";
 
 const App = () => {
   return (

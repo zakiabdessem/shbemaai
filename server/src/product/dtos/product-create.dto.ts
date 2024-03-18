@@ -11,6 +11,7 @@ import { Option } from '../product.schema';
 import mongoose, { Types } from 'mongoose';
 
 export class ProductCreateDto {
+  _id: string;
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -29,7 +30,7 @@ export class ProductCreateDto {
 
   @IsOptional()
   @IsNumber()
-  buisness?: number;
+  business?: number;
 
   @IsOptional()
   @IsNumber()

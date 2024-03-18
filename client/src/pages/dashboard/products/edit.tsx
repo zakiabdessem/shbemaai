@@ -1,9 +1,767 @@
-import React from 'react'
+import { useEffect, useRef, useState } from "react";
+import Layout from "../Layout";
+import { useDispatch } from "@/redux/hooks";
+import useCategories from "@/hooks/categories/useCategories";
+import { TitlePage } from "@/components/PageTitle";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dispatch } from "redux";
+import { Option } from "@/types/product";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { InfoIcon, PlusIcon } from "lucide-react";
+import { Product, useProduct } from "@/hooks/products/useProducts";
+import { useNavigate, useParams } from "react-router-dom";
+import { MAIN_DASHBOARD_URL } from "@/app/constants";
+import { useEditProduct } from "@/hooks/products/useEditProduct";
 
 function EditProduct() {
+  const dispatch = useDispatch();
+
+  const { data: dataCategory } = useCategories();
+
+  const [show, setShow] = useState(true);
+  const [promote, setPromote] = useState(false);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState("");
+  const [providedOptions, setProvidedOptions] = useState<Option[]>();
+
+  const { id = "" } = useParams();
+  const navigate = useNavigate();
+  const dataProduct = useProduct(id);
+  const [product, setProduct] = useState<Product>();
+
+  useEffect(() => {
+    if (!id) return navigate(`${MAIN_DASHBOARD_URL}/products`);
+    if (dataProduct?.options) {
+      const { options, ...productWithoutOptions } = dataProduct;
+      setProduct(productWithoutOptions);
+      setProvidedOptions(options);
+    } else {
+      setProduct(dataProduct);
+    }
+  }, [id, dataProduct]);
+
   return (
-    <div>edit</div>
-  )
+    <Layout>
+      <TitlePage>Edit Product</TitlePage>
+      <div className="flex max-lg:flex-col gap-2">
+        <div className="bg-white rounded-md lg:w-5/6">
+          <div className="p-5 flex max-xl:flex-col justify-between">
+            <InputForm
+              dispatch={dispatch}
+              show={show}
+              promote={promote}
+              categories={categories}
+              category={category}
+              setCategory={setCategory}
+              product={product}
+              setProduct={setProduct}
+              providedOptions={providedOptions}
+            />
+          </div>
+        </div>
+        <div className="lg:w-1/3">
+          <div className="bg-white rounded-md p-2 h-fit mb-2">
+            <div className="p-5 flex flex-col max-xl:flex-col justify-between gap-6">
+              <h2 className="font-montserrat font-semibold p-2 pt-0 px-0 border-b-[1px] mb-2">
+                Options
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  checked={show}
+                  onClick={() => setShow(!show)}
+                  id="show"
+                />
+                <label
+                  htmlFor="show"
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Show in store
+                </label>
+              </div>
+              <div className="flex items-center space-x-2 pb-2">
+                <Checkbox
+                  checked={promote}
+                  onClick={() => setPromote(!promote)}
+                  id="promote"
+                />
+                <label
+                  htmlFor="promote"
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Promote this product
+                </label>
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-md p-2 h-fit">
+            <div className="p-5 flex flex-col max-xl:flex-col justify-between gap-6">
+              <h2 className="font-montserrat font-semibold p-2 pt-0 px-0 border-b-[1px] mb-2">
+                Categories
+              </h2>
+              <div className="flex items-center space-x-2">
+                <Checkbox id="show" checked disabled />
+                <label
+                  htmlFor="show"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  All Categories
+                </label>
+              </div>
+              {dataCategory?.categories.map((category: any) => (
+                <div className="flex items-center space-x-1" key={category._id}>
+                  <Checkbox
+                    id={category._id}
+                    onClick={() => {
+                      if (categories.includes(category._id)) {
+                        setCategories(
+                          categories.filter((c) => c !== category._id)
+                        );
+                      } else {
+                        setCategories([...categories, category._id]);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor={category._id}
+                    className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {category.name}
+                  </label>
+                </div>
+              ))}
+              <Input
+                type="text"
+                placeholder="Add new category"
+                value={category || ""}
+                onChange={(e) => setCategory(e.target.value)}
+                maxLength={70}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
 }
 
-export default EditProduct
+export function InputForm({
+  show,
+  promote,
+  categories,
+  dispatch,
+  category,
+  product,
+  providedOptions,
+}: {
+  show: boolean;
+  promote: boolean;
+  categories: string[];
+  dispatch: Dispatch;
+  category?: string;
+  setCategory?: (category: string) => void;
+  product: Product | undefined;
+  setProduct?: (product: Product) => void;
+  providedOptions?: Option[];
+}) {
+  const editProductMutation = useEditProduct();
+
+  const [selectedImage, setSelectedImage] = useState<File | string | null>(
+    product?.image ?? null
+  );
+
+  useEffect(() => {
+    setSelectedImage(product?.image ?? null);
+  }, [product]);
+
+  const [trackInv, setTrackinv] = useState(product?.quantity ? true : false);
+  const [stockStatus, setStockStatus] = useState(
+    !product?.inStock ? "outStock" : "inStock"
+  );
+
+  const [options, setOptions] = useState<Option[]>([]);
+
+  const addOption = () =>
+    setOptions([...options, { name: "", image: null, changed: false }]);
+
+  const handleSwitchInvMode = () => setTrackinv(!trackInv);
+
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+      image: null,
+      price: 0,
+      business: 0,
+      unit: 10,
+      weight: 0,
+      sku: "",
+      quantity: 0,
+      inStock: false,
+    },
+    values: product,
+  });
+
+  const [optionsPreview, setOptionsPreview] = useState<Option[]>();
+
+  const handleOptionImageChange = (index: number, file: File) => {
+    if (!options) return;
+    const newOptions = [...options];
+    newOptions[index] = { ...newOptions[index], image: file, changed: true };
+    setOptions(newOptions);
+  };
+
+  function onSubmit(data: any) {
+    console.log("data", data);
+    dispatch({
+      type: "APP_SET_LOADING",
+    });
+
+    Object.assign(data, { show, promote, categories, category });
+
+    // Filter options with non-empty names
+    if (options) {
+      data.options = options.filter((option) => option.name !== "");
+    }
+
+    // Set inStock property based on trackInv and stockStatus
+    if (!trackInv) {
+      data.inStock = stockStatus === "inStock";
+    }
+
+    // Continue from here
+    console.log("gdg");
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      data.image = event?.target?.result;
+
+      // Once image reading is complete, do the same for option images
+      if (data.options.length === 0) {
+        console.log("allOptionImagesRead");
+        return editProductMutation.mutateAsync(data);
+      }
+      data.options.forEach((option: any) => {
+        const optionReader = new FileReader();
+        optionReader.onload = function (event) {
+          option.image = event?.target?.result;
+
+          //Check if all option images have been read before mutating
+          const allOptionImagesRead = data.options.every(
+            (opt: any) => opt.image !== undefined
+          );
+
+          console.log("allOptionImagesRead", allOptionImagesRead);
+          if (allOptionImagesRead) editProductMutation.mutateAsync(data);
+        };
+        if (option.changed && option.image)
+          optionReader.readAsDataURL(option.image);
+      });
+    };
+    console.log(selectedImage);
+
+    if (selectedImage !== product?.image) reader.readAsDataURL(data.image[0]);
+  }
+
+  const refPushedOptions = useRef(false); // Initialized with false to indicate options haven't been pushed
+
+  useEffect(() => {
+    // Check if product.options exists and options haven't been pushed yet
+    if (providedOptions && !refPushedOptions.current) {
+      setOptions(providedOptions);
+      refPushedOptions.current = true; // Indicate that options have been pushed
+    }
+
+    const optionsPreviews = options?.map((option) => {
+      // If option.image is a File, create a new object URL
+      if (option.image instanceof File) {
+        const objectURL = URL.createObjectURL(option.image);
+        return {
+          ...option,
+          image: objectURL,
+        };
+      } else {
+        // Return the option as is if image is not a File
+        return option;
+      }
+    });
+
+    setOptionsPreview(optionsPreviews);
+
+    // Cleanup function to revoke object URLs
+    return () => {
+      optionsPreviews?.forEach((option) => {
+        // Ensure to revoke URLs only for object URLs created from Files
+        if (
+          option.image &&
+          typeof option.image === "string" &&
+          option.image.startsWith("blob:")
+        ) {
+          URL.revokeObjectURL(option.image);
+        }
+      });
+    };
+  }, [options, providedOptions]);
+
+  return (
+    <Form {...form}>
+      <div className="flex flex-col w-full">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Product info */}
+          <div>
+            <h2 className="font-montserrat font-semibold p-2 px-0 border-b-[1px] mb-2">
+              Product info
+            </h2>
+            <div className="w-5/6 p-3">
+              {/* Product Name */}
+              <div className="p-2">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Product*</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Untilted Product"
+                          maxLength={150}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your public product name.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="p-2">
+                {/* Description */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="eg This is cool product"
+                          maxLength={516}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This is your public product description.
+                      </FormDescription>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Image */}
+              <div className="p-2">
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col max-w-64">
+                      <FormLabel>Image*</FormLabel>
+                      <FormControl>
+                        <Button size="lg" type="button">
+                          <input
+                            type="file"
+                            className="hidden"
+                            id="fileInput"
+                            onBlur={field.onBlur}
+                            name={field.name}
+                            onChange={(e) => {
+                              field.onChange(e.target.files);
+                              setSelectedImage(e.target.files?.[0] || null);
+                            }}
+                            ref={field.ref}
+                          />
+
+                          <label
+                            htmlFor="fileInput"
+                            className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
+                            <span className="whitespace-nowrap">
+                              {selectedImage instanceof File
+                                ? selectedImage.name
+                                : "choose your image"}
+                            </span>
+                          </label>
+                        </Button>
+                      </FormControl>
+                      <FormDescription>
+                        2mb max, PNG, JPG, JPEG, WEBP
+                      </FormDescription>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex max-md:flex-col gap-3">
+                {/* Price */}
+                <div className="p-2">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem className="max-w-32">
+                        <FormLabel>Price*</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormDescription>DA</FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="flex items-center gap-1 p-2">
+                  {/* Business */}
+                  <FormField
+                    control={form.control}
+                    name="business"
+                    render={({ field }) => (
+                      <FormItem className="max-w-20">
+                        <FormLabel>Business</FormLabel>
+                        <Popover>
+                          <PopoverTrigger>
+                            <InfoIcon
+                              className="cursor-pointer relative bottom-1 left-[2px]"
+                              width={10}
+                              height={10}
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
+                            <div className="text-gray-700">
+                              Example
+                              <p>
+                                Price:{" "}
+                                <span className="font-semibold">1000 DA</span>
+                              </p>
+                              <p>
+                                Quantity:{" "}
+                                <span className="font-semibold">20 pieces</span>
+                              </p>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <FormControl>
+                          <Input type="number" placeholder="0" {...field} />
+                        </FormControl>
+                        <FormDescription>DA</FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  /
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem className="max-w-[73px]">
+                        <FormLabel>Piece</FormLabel>
+                        <FormControl>
+                          <Input type="number" placeholder="10" {...field} />
+                        </FormControl>
+                        <FormDescription>Unit</FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="flex max-md:flex-col gap-2 p-2">
+                {/* Weight */}
+                <FormField
+                  control={form.control}
+                  name="weight"
+                  render={({ field }) => (
+                    <FormItem className="max-w-32">
+                      <FormLabel>Weight</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="100" {...field} />
+                      </FormControl>
+                      <FormDescription>Gram</FormDescription>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* SKU */}
+                <FormField
+                  control={form.control}
+                  name="sku"
+                  render={({ field }) => (
+                    <FormItem className="max-w-72">
+                      <FormLabel>SKU</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          placeholder="ABC-12345-S-BL"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="font-montserrat font-semibold p-2 px-0 border-b-[1px] mb-2">
+              Product Options
+            </h2>
+            <p className="py-2 text-md">
+              Does your product come in different options, like size, color or
+              <span className="block">material? Add them here.</span>
+            </p>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="my-4" variant="outline">
+                  <PlusIcon className="mr-2" width={16} height={16} />
+                  Add Options
+                </Button>
+              </DialogTrigger>
+              <DialogContent
+                className={"lg:max-w-screen-md overflow-y-scroll max-h-screen"}>
+                <DialogHeader>
+                  <DialogTitle>Add product option</DialogTitle>
+                  <DialogDescription>
+                    You'll be able to manage pricing and inventory for this
+                    product option later on.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2">
+                      {options &&
+                        optionsPreview &&
+                        options?.map((item, index) => {
+                          const optionWatch = optionsPreview
+                            ? optionsPreview[index]
+                            : undefined;
+
+                          if (optionWatch?.image instanceof File) {
+                            try {
+                              optionWatch.image = URL.createObjectURL(
+                                optionWatch.image
+                              );
+                            } catch (error) {
+                              console.error(
+                                "Error creating object URL:",
+                                error
+                              );
+                            }
+                          }
+
+                          return (
+                            <div
+                              className="flex flex-col items-start gap-2 py-3"
+                              key={index}>
+                              <div className="flex flex-col items-start gap-2">
+                                {/* Option Name Input */}
+                                <Label
+                                  htmlFor={`options.${index}.name`}
+                                  className="text-right">
+                                  Option {index + 1}
+                                </Label>
+                                <Input
+                                  id="name"
+                                  className="col-span-3"
+                                  placeholder="Option Name"
+                                  value={item?.name || ""}
+                                  onChange={(e) => {
+                                    const newOptions = [...options];
+                                    newOptions[index].name = e.target.value;
+                                    setOptions(newOptions);
+                                  }}
+                                />
+
+                                {/* Image Upload for Option */}
+                                <Button>
+                                  <input
+                                    type="file"
+                                    className="hidden"
+                                    name={`fileInput-${index}`}
+                                    id={`fileInput-${index}`}
+                                    onChange={(e) => {
+                                      if (e.target.files)
+                                        handleOptionImageChange(
+                                          index,
+                                          e.target.files[0]
+                                        );
+                                    }}
+                                  />
+
+                                  <TooltipProvider>
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <label
+                                          htmlFor={`fileInput-${index}`}
+                                          className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                          {optionWatch?.image
+                                            ? "Change image"
+                                            : "Choose an image"}
+                                        </label>
+                                      </TooltipTrigger>
+                                      {optionsPreview[index]?.image && (
+                                        <TooltipContent>
+                                          <img
+                                            src={
+                                              optionWatch?.image?.toString() ||
+                                              ""
+                                            }
+                                            alt="Option Preview"
+                                            style={{
+                                              width: "120px",
+                                              height: "auto",
+                                            }}
+                                          />
+                                        </TooltipContent>
+                                      )}
+                                    </Tooltip>
+                                  </TooltipProvider>
+                                </Button>
+                              </div>
+
+                              {/* Remove Option Button */}
+                              <Button
+                                variant="destructive"
+                                type="button"
+                                onClick={() => {
+                                  const newOptions = [...options];
+                                  newOptions.splice(index, 1);
+                                  setOptions(newOptions);
+                                }}>
+                                Remove Option
+                              </Button>
+                            </div>
+                          );
+                        })}
+                      <Button
+                        variant="outline"
+                        type="button"
+                        onClick={addOption}>
+                        Add Option
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <DialogClose>
+                    <Button>Save changes</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div>
+            <h2 className="font-montserrat font-semibold p-2 px-0 border-b-[1px] mb-2">
+              Inventory
+            </h2>
+
+            <div className="flex items-center space-x-2 p-4">
+              <Switch
+                id="airplane-mode"
+                onClick={handleSwitchInvMode}
+                checked={trackInv}
+              />
+              <Label htmlFor="airplane-mode">Inventory Track</Label>
+            </div>
+
+            {!trackInv ? (
+              <div className="p-2">
+                <Select onValueChange={(value) => setStockStatus(value)}>
+                  <Label>Status</Label>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="inStock" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inStock">InStock</SelectItem>
+                    <SelectItem value="outStock">Out of stock</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <FormField
+                control={form.control}
+                name="quantity"
+                render={({ field }) => (
+                  <FormItem className="max-w-36 p-2">
+                    <FormLabel>Quantity</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+
+          <Button className="my-5" type="submit" size="lg" color="primary">
+            Create Product
+          </Button>
+        </form>
+      </div>
+    </Form>
+  );
+}
+
+export default EditProduct;

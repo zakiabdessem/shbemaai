@@ -11,6 +11,11 @@ export class ProductResolver {
     private categoryService: CategoryService,
   ) {}
 
+  @Query(() => Product)
+  async product(@Args('id') id: string): Promise<Product> {
+    return this.productService.findOne(id);
+  }
+
   //GET_DATA_PRODUCTS_BY_CATEGORY
   @Query(() => [Product])
   async productsByCategory(

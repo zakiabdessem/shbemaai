@@ -1,7 +1,6 @@
 import Layout from "../Layout";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -53,6 +52,8 @@ import { useCreateProduct } from "@/hooks/products/useCreateProduct";
 import { useDispatch } from "@/redux/hooks";
 import { Option } from "@/types/product";
 import { Dispatch } from "redux";
+import { TitlePage } from "@/components/PageTitle";
+import { FormSchema } from "@/validator/product";
 
 function CreateProduct() {
   const dispatch = useDispatch();
@@ -66,7 +67,7 @@ function CreateProduct() {
 
   return (
     <Layout>
-      <TitlePage />
+      <TitlePage>Create Product</TitlePage>
       <div className="flex max-lg:flex-col gap-2">
         <div className="bg-white rounded-md lg:w-5/6">
           <div className="p-5 flex max-xl:flex-col justify-between">
@@ -161,49 +162,6 @@ function CreateProduct() {
   );
 }
 
-const TitlePage = () => {
-  return (
-    <h1 className="text-3xl font-semibold text-gray-800 p-5 pt-0 pl-0">
-      Create Product
-    </h1>
-  );
-};
-
-const MAX_FILE_SIZE = 1024 * 1024 * 2;
-const ACCEPTED_IMAGE_MIME_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
-
-const FormSchema = z.object({
-  name: z.string().min(2, {
-    message: "title must be at least 2 characters.",
-  }),
-  description: z
-    .string()
-    .max(516, {
-      message: "description must be at most 516 characters.",
-    })
-    .optional(),
-  image: z
-    .any()
-    .refine((files) => {
-      return files?.[0]?.size <= MAX_FILE_SIZE;
-    }, `Max image size is 5MB.`)
-    .refine(
-      (files) => ACCEPTED_IMAGE_MIME_TYPES.includes(files?.[0]?.type),
-      "Only .jpg, .jpeg, .png and .webp formats are supported."
-    ),
-  sku: z.string(),
-  price: z.coerce.number().min(1),
-  buisness: z.coerce.number().min(1),
-  unit: z.coerce.number().min(1),
-  weight: z.coerce.number().min(1),
-  quantity: z.coerce.number().optional(),
-});
-
 export function InputForm({
   show,
   promote,
@@ -224,9 +182,12 @@ export function InputForm({
   const [trackInv, setTrackinv] = useState(false);
   const [stockStatus, setStockStatus] = useState("inStock");
 
-  const [options, setOptions] = useState<Option[]>([{ name: "", image: null }]);
+  const [options, setOptions] = useState<Option[]>([
+    { name: "", image: null, changed: false },
+  ]);
 
-  const addOption = () => setOptions([...options, { name: "", image: null }]);
+  const addOption = () =>
+    setOptions([...options, { name: "", image: null, changed: false }]);
 
   const handleSwitchInvMode = () => setTrackinv(!trackInv);
 
@@ -274,14 +235,17 @@ export function InputForm({
       type: "APP_SET_LOADING",
     });
 
-    data.show = show;
-    data.promote = promote;
-    data.categories = categories;
-    data.category = category;
+    Object.assign(data, { show, promote, categories, category });
 
-    //image upload
-    if (options) data.options = options.filter((option) => option.name !== "");
-    if (!trackInv) data.inStock = stockStatus === "inStock";
+    // Filter options with non-empty names
+    if (options) {
+      data.options = options.filter((option) => option.name !== "");
+    }
+
+    // Set inStock property based on trackInv and stockStatus
+    if (!trackInv) {
+      data.inStock = stockStatus === "inStock";
+    }
 
     const reader = new FileReader();
     reader.onload = function (event) {

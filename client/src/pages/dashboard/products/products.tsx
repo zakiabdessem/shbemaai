@@ -10,7 +10,7 @@ import {
 import Layout from "../Layout";
 import { Checkbox } from "@/components/ui/checkbox";
 import { asset } from "@/lib/data";
-import { MAIN_DASHBOARD_URL, MAIN_WEBSITE_URL } from "@/app/constants";
+import { MAIN_DASHBOARD_URL } from "@/app/constants";
 import {
   Select,
   SelectContent,
@@ -21,10 +21,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import useProducts, { Category, Product } from "@/hooks/products/useProducts";
+import { Category, Product, useProducts } from "@/hooks/products/useProducts";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "lucide-react";
+
+// TODO: Add table pagination
 
 export default function Products() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
@@ -207,7 +209,7 @@ function ProductTable({
                 </TableCell>
                 <TableCell>
                   <img
-                    src={product.image}
+                    src={product?.image ?? ""}
                     className="h-16 w-16 rounded-full"
                     alt=""
                   />
@@ -226,7 +228,7 @@ function ProductTable({
                     : `${product.inStock ? "In Stock" : "Out of Stock"}`}
                 </TableCell>
                 <TableCell className="text-right">
-                  <a href={MAIN_WEBSITE_URL}>
+                  <a href={`${MAIN_DASHBOARD_URL}/products/${product._id}`}>
                     <img
                       src={asset("icons/dots.png")}
                       className="hover:opacity-50 object-contain min-w-5 h-5"
