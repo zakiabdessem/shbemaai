@@ -55,6 +55,13 @@ import { Dispatch } from "redux";
 import { TitlePage } from "@/components/PageTitle";
 import { FormSchema } from "@/validator/product";
 import { toast } from "react-toastify";
+import {
+  Table,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 function CreateProduct() {
   const dispatch = useDispatch();
@@ -570,13 +577,13 @@ export function InputForm({
 
             <Dialog>
               <DialogTrigger asChild>
-                <Button className="my-4" variant="outline">
+                <Button className="my-4 mx-2" variant="outline">
                   <PlusIcon className="mr-2" width={16} height={16} />
                   Add Options
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={"lg:max-w-screen-md overflow-y-scroll max-h-screen"}>
+                className={"max-w-screen-lg overflow-y-scroll max-h-screen"}>
                 <DialogHeader>
                   <DialogTitle>Add product option</DialogTitle>
                   <DialogDescription>
@@ -584,168 +591,166 @@ export function InputForm({
                     product option later on.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="flex items-start gap-4">
-                    <div className="p-2">
-                      {options.map((item, index) => {
-                        const optionWatch = optionsPreview[index];
-                        // blob the image
-                        if (optionWatch?.image instanceof File) {
-                          try {
-                            optionWatch.image = URL.createObjectURL(
-                              optionWatch.image
-                            );
-                          } catch (error) {
-                            console.error("Error creating object URL:", error);
-                          }
+                <div className="grid gap-4 py-4 p-2">
+                  <Table>
+                    <TableHeader>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Image</TableHead>
+                      <TableHead>Track</TableHead>
+                      <TableHead>Inverntory</TableHead>
+                      <TableHead>Remove</TableHead>
+                    </TableHeader>
+
+                    {options.map((item, index) => {
+                      const optionWatch = optionsPreview[index];
+                      if (optionWatch?.image instanceof File) {
+                        try {
+                          optionWatch.image = URL.createObjectURL(
+                            optionWatch.image
+                          );
+                        } catch (error) {
+                          console.error("Error creating object URL:", error);
                         }
+                      }
 
-                        return (
-                          <div
-                            className="flex flex-col items-start gap-2 py-3"
-                            key={index}>
-                            <div className="flex flex-col items-start gap-2">
-                              {/* Option Name Input */}
-                              <Label
-                                htmlFor={`options.${index}.name`}
-                                className="text-right">
-                                Option {index + 1}
-                              </Label>
-                              <div className="flex justify-center items-center gap-2">
-                                <Input
-                                  id="name"
-                                  className="col-span-3 max-w-36"
-                                  placeholder="Option Name"
-                                  value={item.name}
-                                  onChange={(e) => {
-                                    const newOptions = [...options];
-                                    newOptions[index].name = e.target.value;
-                                    setOptions(newOptions);
-                                  }}
-                                />
+                      return (
+                        <TableRow key={index}>
+                          {/* Option Name Input */}
 
-                                {/* Image Upload for Option */}
-                                <Button>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    name={`fileInput-${index}`}
-                                    id={`fileInput-${index}`}
-                                    accept="image/jpeg, image/jpg, image/png, image/webp"
-                                    onChange={(e) => {
-                                      if (e.target.files)
-                                        handleOptionImageChange(
-                                          index,
-                                          e.target.files[0]
-                                        );
-                                    }}
-                                  />
+                          <TableCell>
+                            <Input
+                              id="name"
+                              className="col-span-3 w-48"
+                              placeholder="Option Name"
+                              value={item.name}
+                              onChange={(e) => {
+                                const newOptions = [...options];
+                                newOptions[index].name = e.target.value;
+                                setOptions(newOptions);
+                              }}
+                            />
+                          </TableCell>
 
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <label
-                                          htmlFor={`fileInput-${index}`}
-                                          className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                                          {optionWatch?.image
-                                            ? "Change image"
-                                            : "Choose an image"}
-                                        </label>
-                                      </TooltipTrigger>
-                                      {optionsPreview[index]?.image && (
-                                        <TooltipContent>
-                                          <img
-                                            src={
-                                              optionWatch.image?.toString() ||
-                                              ""
-                                            }
-                                            alt="Option Preview"
-                                            style={{
-                                              width: "120px",
-                                              height: "auto",
-                                            }}
-                                          />
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </Button>
+                          <TableCell>
+                            {/* Image Upload for Option */}
+                            <Button>
+                              <input
+                                type="file"
+                                className="hidden"
+                                name={`fileInput-${index}`}
+                                id={`fileInput-${index}`}
+                                accept="image/jpeg, image/jpg, image/png, image/webp"
+                                onChange={(e) => {
+                                  if (e.target.files)
+                                    handleOptionImageChange(
+                                      index,
+                                      e.target.files[0]
+                                    );
+                                }}
+                              />
 
-                                <div className="flex flex-col justify-center items-center space-x-2 p-4">
-                                  <Switch
-                                    id="airplane-mode"
-                                    onClick={() => {
-                                      const newOptions = [...options];
-                                      newOptions[index].track =
-                                        !newOptions[index].track;
-                                      setOptions(newOptions);
-                                    }}
-                                    checked={item.track}
-                                  />
-                                </div>
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger>
+                                    <label
+                                      htmlFor={`fileInput-${index}`}
+                                      className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                      {optionWatch?.image
+                                        ? "Change image"
+                                        : "Choose an image"}
+                                    </label>
+                                  </TooltipTrigger>
+                                  {optionsPreview[index]?.image && (
+                                    <TooltipContent>
+                                      <img
+                                        src={
+                                          optionWatch.image?.toString() || ""
+                                        }
+                                        alt="Option Preview"
+                                        style={{
+                                          width: "120px",
+                                          height: "auto",
+                                        }}
+                                      />
+                                    </TooltipContent>
+                                  )}
+                                </Tooltip>
+                              </TooltipProvider>
+                            </Button>
+                          </TableCell>
 
-                                {!item.track ? (
-                                  <div className="w-22">
-                                    <Select
-                                      onValueChange={(value) => {
-                                        const newOptions = [...options];
-                                        newOptions[index].inStock =
-                                          value === "inStock";
-                                        setOptions(newOptions);
-                                      }}>
-                                      <SelectTrigger className="w-[180px]">
-                                        <SelectValue placeholder="inStock" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        <SelectItem value="inStock">
-                                          InStock
-                                        </SelectItem>
-                                        <SelectItem value="outStock">
-                                          Out of stock
-                                        </SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                ) : (
-                                  <div className="w-32">
-                                    <Input
-                                      type="number"
-                                      placeholder="0"
-                                      value={item.quantity}
-                                      onChange={(e) => {
-                                        const newOptions = [...options];
-                                        newOptions[index].quantity =
-                                          parseInt(e.target.value) || 0;
-                                        setOptions(newOptions);
-                                      }}
-                                    />
-                                  </div>
-                                )}
+                          <TableCell>
+                            <Switch
+                              id="airplane-mode"
+                              onClick={() => {
+                                const newOptions = [...options];
+                                newOptions[index].track =
+                                  !newOptions[index].track;
+                                setOptions(newOptions);
+                              }}
+                              checked={item.track}
+                            />
+                          </TableCell>
 
-                                {/* Remove Option Button */}
-                                <Button
-                                  variant="destructive"
-                                  type="button"
-                                  onClick={() => {
-                                    const newOptions = [...options];
-                                    newOptions.splice(index, 1);
-                                    setOptions(newOptions);
-                                  }}>
-                                  <CircleX />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <Button
-                        variant="outline"
-                        type="button"
-                        onClick={addOption}>
-                        Add Option
-                      </Button>
-                    </div>
-                  </div>
+                          {!item.track ? (
+                            <TableCell className="w-22">
+                              <Select
+                                onValueChange={(value) => {
+                                  const newOptions = [...options];
+                                  newOptions[index].inStock =
+                                    value === "inStock";
+                                  setOptions(newOptions);
+                                }}>
+                                <SelectTrigger className="w-[180px]">
+                                  <SelectValue placeholder="inStock" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="inStock">
+                                    InStock
+                                  </SelectItem>
+                                  <SelectItem value="outStock">
+                                    Out of stock
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                          ) : (
+                            <TableCell className="w-32">
+                              <Input
+                                type="number"
+                                placeholder="0"
+                                value={item.quantity}
+                                onChange={(e) => {
+                                  const newOptions = [...options];
+                                  newOptions[index].quantity =
+                                    parseInt(e.target.value) || 0;
+                                  setOptions(newOptions);
+                                }}
+                              />
+                            </TableCell>
+                          )}
+
+                          <TableCell>
+                            {/* Remove Option Button */}
+                            <Button
+                              variant="destructive"
+                              type="button"
+                              onClick={() => {
+                                const newOptions = [...options];
+                                newOptions.splice(index, 1);
+                                setOptions(newOptions);
+                              }}>
+                              <CircleX />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </Table>
+
+                  <Button variant="outline" type="button" onClick={addOption}>
+                    Add Option
+                  </Button>
                 </div>
                 <DialogFooter>
                   <DialogClose>
