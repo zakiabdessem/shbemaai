@@ -5,14 +5,14 @@ function Navigation() {
   const pathnames = location.pathname.split("/").filter((x) => x);
 
   return (
-    <nav className="flex p-3" aria-label="Breadcrumb">
-      <ol className="inline-flex items-center space-x-1 text-sm font-medium md:space-x-2">
+    <nav className="flex p-3 " aria-label="Breadcrumb">
+      <ol className="inline-flex items-center space-x-1 md:space-x-2 rounded-lg overflow-auto">
         <li className="inline-flex items-center">
           <Link
             to="/dashboard"
-            className="inline-flex items-center text-gray-700 hover:text-primary-600 ">
+            className="inline-flex items-center text-gray-700 hover:text-primary-600 px-2 py-1 rounded-lg">
             <svg
-              className="w-5 h-5 mr-2.5"
+              className="w-4 h-4 md:w-5 md:h-5 mr-1.5 md:mr-2.5"
               fill="currentColor"
               viewBox="0 0 20 20"
               xmlns="http://www.w3.org/2000/svg">
@@ -20,8 +20,9 @@ function Navigation() {
             </svg>
             Home
           </Link>
+          {/* Icon separation for mobile vs desktop view */}
           <svg
-            className="w-6 h-6 text-gray-400"
+            className="w-5 h-5 text-gray-400 hidden md:inline-block"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg">
@@ -35,16 +36,16 @@ function Navigation() {
         {pathnames.map((name, index) => {
           const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
-
-          const formatText = (text: string) => {
-            return text.charAt(0).toUpperCase() + text.slice(1);
-          };
+          const formatText = (text: string) =>
+            text.charAt(0).toUpperCase() + text.slice(1);
 
           return (
-            <li key={name} className="flex items-center">
+            <li
+              key={name}
+              className="inline-flex items-center text-gray-700 hover:text-primary-600 px-2 py-1 rounded-lg">
               {index > 0 && (
                 <svg
-                  className="w-6 h-6 text-gray-400"
+                  className="w-5 h-5 text-gray-400 hidden md:inline-block"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg">
@@ -57,13 +58,13 @@ function Navigation() {
               )}
 
               {isLast ? (
-                <span className="ml-1 text-gray-400 md:ml-2">
+                <span className="inline-flex items-center text-gray-700 hover:text-primary-600 px-2 py-1 rounded-lg">
                   {formatText(name)}
                 </span>
               ) : (
                 <Link
                   to={routeTo}
-                  className="ml-1 text-gray-700 hover:text-primary-600 md:ml-2">
+                  className="ml-1 text-gray-700 hover:text-primary-600 md:ml-2 px-2 py-1 rounded-lg">
                   {formatText(name)}
                 </Link>
               )}
