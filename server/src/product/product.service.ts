@@ -24,15 +24,14 @@ export class ProductService {
     return await newProduct.save();
   }
 
-  async edit(CategoryCreateDto: ProductCreateDto): Promise<Product> {
-    const product = await this.findOne(CategoryCreateDto._id);
-    if (!product) return null;
+  async edit(CategoryCreateDto: ProductCreateDto): Promise<Product & { _id: string }> {
+    const product = await this.findOne(CategoryCreateDto['_id']);
+    if (!product) return null as any;
 
-    return await this.productModel
-      .findByIdAndUpdate(CategoryCreateDto._id, CategoryCreateDto, {
+    return await (this.productModel
+      .findByIdAndUpdate(CategoryCreateDto['_id'], CategoryCreateDto, {
         new: true,
-      })
-      .exec();
+      }) as any).exec();
   }
 
   async findAll(sortBy: string): Promise<Product[]> {

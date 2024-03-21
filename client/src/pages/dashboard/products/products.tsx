@@ -79,7 +79,7 @@ export default function Products() {
 
   return (
     <Layout>
-      <div className="flex justify-between">
+      <div className="flex max-sm:flex-col justify-between p-2">
         <TitlePage count={count} />
         <a href={`${MAIN_DASHBOARD_URL}/products/create`}>
           <Button>
@@ -207,10 +207,10 @@ function ProductTable({
                     checked={selectedProducts.includes(product._id)}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="max-h-16 max-w-16 ">
                   <img
                     src={product?.image ?? ""}
-                    className="h-16 w-16 rounded-full"
+                    className="min-h-16 min-w-16 rounded-full"
                     alt=""
                   />
                 </TableCell>
@@ -223,9 +223,11 @@ function ProductTable({
                   DZD {product.price.toFixed(2)}
                 </TableCell>
                 <TableCell className="font-medium text-gray-400">
-                  {product.quantity
-                    ? product.quantity + " left"
-                    : `${product.inStock ? "In Stock" : "Out of Stock"}`}
+                  {product.track
+                    ? product.quantity
+                    : product.inStock
+                    ? "In Stock"
+                    : "Out of Stock"}
                 </TableCell>
                 <TableCell className="text-right">
                   <a href={`${MAIN_DASHBOARD_URL}/products/${product._id}`}>

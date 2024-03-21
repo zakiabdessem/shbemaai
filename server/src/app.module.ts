@@ -7,7 +7,10 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { ProductModule } from './product/product.module';
 import { CategoryModule } from './category/category.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-
+import { OrderController } from './order/order.controller';
+import { OrderModule } from './order/order.module';
+import { CouponModule } from './coupon/coupon.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -18,8 +21,11 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     ProductModule,
     CategoryModule,
     CloudinaryModule,
+    OrderModule,
+    CouponModule,
+    CartModule,
   ],
-  controllers: [],
+  controllers: [OrderController],
   providers: [],
 })
 export class AppModule {}

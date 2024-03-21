@@ -10,7 +10,6 @@ import {
 import { ProductService } from './product.service';
 import { ProductCreateDto } from './dtos/product-create.dto';
 import { Response } from 'express';
-import { Category } from 'src/category/category.schema';
 import { CategoryService } from 'src/category/category.service';
 import { Roles } from 'src/decorator/roles.decorator';
 import { UserRole } from 'src/decorator/role.entity';
@@ -161,7 +160,7 @@ export class ProductController {
         }),
       );
 
-      await this.prodcutService.edit(editProductDto);
+      await this.prodcutService.edit(product);
 
       return res.status(HttpStatus.OK).json({ data: product });
     } catch (error) {

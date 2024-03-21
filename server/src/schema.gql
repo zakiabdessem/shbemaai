@@ -22,6 +22,7 @@ type Product {
   quantity: Float
   show: Boolean
   sku: String
+  track: Boolean
   unit: Float
   weight: Float
 }
@@ -50,5 +51,6 @@ type options {
   price: Float!
   quantity: Float!
   sku: Boolean!
+  track: Boolean!
   wieght: Float!
 }

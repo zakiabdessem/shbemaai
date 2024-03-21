@@ -27,6 +27,7 @@ async function bootstrap() {
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
+  console.log(process.env.SECRET)
   app.use(
     session({
       secret: process.env.SECRET,

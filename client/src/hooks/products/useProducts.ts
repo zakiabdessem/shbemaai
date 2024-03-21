@@ -12,6 +12,7 @@ export interface Product {
   name: string;
   image: string | null | "";
   categories: {
+    _id: string;
     name: string;
   }[];
   sku: string;
@@ -22,6 +23,7 @@ export interface Product {
   unit: number;
   weight: number;
   options: Option[];
+  track: boolean;
 }
 
 export interface Category {
@@ -43,6 +45,7 @@ const GET_DATA_PRODUCTS = gql`
       price
       quantity
       inStock
+      track
     }
   }
 `;
@@ -61,6 +64,7 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
       price
       quantity
       inStock
+      track
     }
   }
 `;
@@ -73,6 +77,7 @@ const GET_DATA_PRODUCT = gql`
       description
       image
       categories {
+        _id
         name
       }
       business
@@ -82,10 +87,16 @@ const GET_DATA_PRODUCT = gql`
       price
       quantity
       inStock
-      options{
+      options {
         name
         image
+        track
+        quantity
+        inStock
       }
+      show
+      promote
+      track
     }
   }
 `;

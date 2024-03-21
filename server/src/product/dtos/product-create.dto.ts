@@ -54,6 +54,9 @@ export class ProductCreateDto {
   inStock?: boolean;
 
   @IsOptional()
+  track?: boolean;
+
+  @IsOptional()
   @IsArray()
   options?: Option[];
 

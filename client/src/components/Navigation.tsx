@@ -36,14 +36,13 @@ function Navigation() {
           const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
           const isLast = index === pathnames.length - 1;
 
-          // Function to capitalize the first letter
-          const formatText = (text:any) => {
+          const formatText = (text: string) => {
             return text.charAt(0).toUpperCase() + text.slice(1);
           };
 
           return (
             <li key={name} className="flex items-center">
-              {index > 0 && ( // Add arrow icon only between items
+              {index > 0 && (
                 <svg
                   className="w-6 h-6 text-gray-400"
                   fill="currentColor"

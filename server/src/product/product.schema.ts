@@ -4,7 +4,7 @@ import mongoose, { Document, Types } from 'mongoose';
 
 @ObjectType('options')
 export class Option {
-  changed: boolean;
+  changed?: boolean;
   @Field()
   @Prop()
   name: string;
@@ -34,14 +34,22 @@ export class Option {
   @Field()
   @Prop({
     required: false,
+    default: 0,
   })
   quantity?: number;
 
   @Field()
   @Prop({
     required: false,
+    default: false,
   })
   inStock?: boolean;
+
+  @Field()
+  @Prop({
+    required: false,
+  })
+  track?: boolean;
 }
 
 @ObjectType('Product')
@@ -89,6 +97,12 @@ export class Product {
     required: false,
   })
   inStock: boolean;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+  })
+  track: boolean;
 
   @Field(() => [Option], { nullable: true })
   @Prop({
@@ -142,17 +156,17 @@ ProductSchema.pre<ProductDocument>('save', function (next) {
       'A product cannot have both "quantity" and "inStock" defined. Please choose one.',
     );
 
-  for (let i = 0; i < this.options.length; i++) {
-    if (
-      !!this.options[i].quantity == true &&
-      !!this.options[i].inStock == true
-    ) {
-      error = new Error(
-        'A product cannot have both "quantity" and "inStock" defined. Please choose one.',
-      );
-      break;
-    }
-  }
+  // for (let i = 0; i < this.options.length; i++) {
+  //   if (
+  //     !!this.options[i].quantity == true &&
+  //     !!this.options[i].inStock == true
+  //   ) {
+  //     error = new Error(
+  //       'A product cannot have both "quantity" and "inStock" defined. Please choose one.',
+  //     );
+  //     break;
+  //   }
+  // }
 
   if (error) next(error);
   else next();

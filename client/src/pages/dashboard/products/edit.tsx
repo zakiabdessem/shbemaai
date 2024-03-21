@@ -32,7 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Dispatch } from "redux";
-import { Option } from "@/types/product";
+import { Category, Option } from "@/types/product";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -49,11 +49,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { InfoIcon, PlusIcon } from "lucide-react";
+import { CircleX, InfoIcon, PlusIcon } from "lucide-react";
 import { Product, useProduct } from "@/hooks/products/useProducts";
 import { useNavigate, useParams } from "react-router-dom";
 import { MAIN_DASHBOARD_URL } from "@/app/constants";
 import { useEditProduct } from "@/hooks/products/useEditProduct";
+import { toast } from "react-toastify";
+
+//TODO: new categorie gets created but no product get pushed into it
 
 function EditProduct() {
   const dispatch = useDispatch();
@@ -80,7 +83,19 @@ function EditProduct() {
     } else {
       setProduct(dataProduct);
     }
+
+    setShow(dataProduct?.show);
+    setPromote(dataProduct?.promote);
   }, [id, dataProduct]);
+
+  useEffect(() => {
+    if (dataCategory?.categories) {
+      const categoriesSelected = dataProduct?.categories.map(
+        (c: Category) => c._id
+      );
+      setCategories(categoriesSelected);
+    }
+  }, [dataProduct, dataCategory]);
 
   return (
     <Layout>
@@ -146,27 +161,34 @@ function EditProduct() {
                   All Categories
                 </label>
               </div>
-              {dataCategory?.categories.map((category: any) => (
-                <div className="flex items-center space-x-1" key={category._id}>
-                  <Checkbox
-                    id={category._id}
-                    onClick={() => {
-                      if (categories.includes(category._id)) {
-                        setCategories(
-                          categories.filter((c) => c !== category._id)
+              {dataCategory && dataCategory.categories.length > 0 && categories &&
+                dataCategory?.categories.map((category: Category) => (
+                  <div
+                    className="flex items-center space-x-1"
+                    key={category._id}>
+                    <Checkbox
+                      id={category._id}
+                      checked={categories.includes(category._id ?? "")}
+                      onClick={() => {
+                        const isCategorySelected = categories.includes(
+                          category._id ?? ""
                         );
-                      } else {
-                        setCategories([...categories, category._id]);
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor={category._id}
-                    className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {category.name}
-                  </label>
-                </div>
-              ))}
+                        setCategories((currentCategories: any) =>
+                          isCategorySelected
+                            ? currentCategories.filter(
+                                (id: string) => id !== category._id
+                              )
+                            : [...currentCategories, category._id]
+                        );
+                      }}
+                    />
+                    <label
+                      htmlFor={category._id}
+                      className="cursor-pointer text-sm font-medium leading-none">
+                      {category.name}
+                    </label>
+                  </div>
+                ))}
               <Input
                 type="text"
                 placeholder="Add new category"
@@ -206,20 +228,29 @@ export function InputForm({
   const [selectedImage, setSelectedImage] = useState<File | string | null>(
     product?.image ?? null
   );
+  const [stockStatus, setStockStatus] = useState("inStock");
+  const [trackInv, setTrackinv] = useState(false);
 
   useEffect(() => {
     setSelectedImage(product?.image ?? null);
+    setStockStatus(!product?.inStock ? "outStock" : "inStock");
+    setTrackinv(product?.track ?? false);
   }, [product]);
-
-  const [trackInv, setTrackinv] = useState(product?.quantity ? true : false);
-  const [stockStatus, setStockStatus] = useState(
-    !product?.inStock ? "outStock" : "inStock"
-  );
 
   const [options, setOptions] = useState<Option[]>([]);
 
   const addOption = () =>
-    setOptions([...options, { name: "", image: null, changed: false }]);
+    setOptions([
+      ...options,
+      {
+        name: "",
+        image: null,
+        changed: false,
+        track: false,
+        inStock: true,
+        quantity: 0,
+      },
+    ]);
 
   const handleSwitchInvMode = () => setTrackinv(!trackInv);
 
@@ -249,68 +280,86 @@ export function InputForm({
   };
 
   function onSubmit(data: any) {
-    console.log("data", data);
-    dispatch({
-      type: "APP_SET_LOADING",
+    dispatch({ type: "APP_SET_LOADING" });
+
+    Object.assign(data, {
+      show,
+      promote,
+      categories,
+      category,
+      track: trackInv,
     });
 
-    Object.assign(data, { show, promote, categories, category });
+    let proceed = true;
 
     // Filter options with non-empty names
     if (options) {
+      options.forEach((option, index) => {
+        if (option.name === "" || option.image === null) {
+          toast.error(`Option ${index + 1} cannot be empty`, {
+            position: "bottom-right",
+          });
+          proceed = false;
+          return;
+        }
+      });
+
+      if (!proceed) {
+        dispatch({
+          type: "APP_CLEAR_LOADING",
+        });
+        return;
+      }
+
       data.options = options.filter((option) => option.name !== "");
     }
 
-    // Set inStock property based on trackInv and stockStatus
+    // Set inStock property
     if (!trackInv) {
       data.inStock = stockStatus === "inStock";
     }
 
-    // Continue from here
-    console.log("gdg");
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-      data.image = event?.target?.result;
-
-      // Once image reading is complete, do the same for option images
-      if (data.options.length === 0) {
-        console.log("allOptionImagesRead");
+    // Handle the main image and option images uploading
+    handleImageUpload(data)
+      .then(() => {
+        console.log("Submission data ready:", data);
         return editProductMutation.mutateAsync(data);
-      }
-      data.options.forEach((option: any) => {
-        const optionReader = new FileReader();
-        optionReader.onload = function (event) {
-          option.image = event?.target?.result;
-
-          //Check if all option images have been read before mutating
-          const allOptionImagesRead = data.options.every(
-            (opt: any) => opt.image !== undefined
-          );
-
-          console.log("allOptionImagesRead", allOptionImagesRead);
-          if (allOptionImagesRead) editProductMutation.mutateAsync(data);
-        };
-        if (option.changed && option.image)
-          optionReader.readAsDataURL(option.image);
-      });
-    };
-    console.log(selectedImage);
-
-    if (selectedImage !== product?.image) reader.readAsDataURL(data.image[0]);
+      })
+      .catch((error) => console.error("Error processing images:", error));
   }
 
-  const refPushedOptions = useRef(false); // Initialized with false to indicate options haven't been pushed
+  async function handleImageUpload(data: any) {
+    if (selectedImage !== product?.image) {
+      data.image = await readFileAsDataURL(data.image[0]);
+    }
+
+    await Promise.all(
+      data.options.map(async (option: any) => {
+        if (option.changed && option.image) {
+          option.image = await readFileAsDataURL(option.image);
+        }
+      })
+    );
+  }
+
+  function readFileAsDataURL(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  }
+
+  const refPushedOptions = useRef(false);
 
   useEffect(() => {
-    // Check if product.options exists and options haven't been pushed yet
     if (providedOptions && !refPushedOptions.current) {
       setOptions(providedOptions);
-      refPushedOptions.current = true; // Indicate that options have been pushed
+      refPushedOptions.current = true;
     }
 
     const optionsPreviews = options?.map((option) => {
-      // If option.image is a File, create a new object URL
       if (option.image instanceof File) {
         const objectURL = URL.createObjectURL(option.image);
         return {
@@ -325,10 +374,8 @@ export function InputForm({
 
     setOptionsPreview(optionsPreviews);
 
-    // Cleanup function to revoke object URLs
     return () => {
       optionsPreviews?.forEach((option) => {
-        // Ensure to revoke URLs only for object URLs created from Files
         if (
           option.image &&
           typeof option.image === "string" &&
@@ -620,76 +667,153 @@ export function InputForm({
                                   className="text-right">
                                   Option {index + 1}
                                 </Label>
-                                <Input
-                                  id="name"
-                                  className="col-span-3"
-                                  placeholder="Option Name"
-                                  value={item?.name || ""}
-                                  onChange={(e) => {
-                                    const newOptions = [...options];
-                                    newOptions[index].name = e.target.value;
-                                    setOptions(newOptions);
-                                  }}
-                                />
-
-                                {/* Image Upload for Option */}
-                                <Button>
-                                  <input
-                                    type="file"
-                                    className="hidden"
-                                    name={`fileInput-${index}`}
-                                    id={`fileInput-${index}`}
+                                <div className="flex justify-center items-center gap-2">
+                                  <Input
+                                    id="name"
+                                    className="col-span-3 max-w-36"
+                                    placeholder="Option Name"
+                                    value={item.name}
                                     onChange={(e) => {
-                                      if (e.target.files)
-                                        handleOptionImageChange(
-                                          index,
-                                          e.target.files[0]
-                                        );
+                                      const newOptions = [...options];
+                                      newOptions[index].name = e.target.value;
+                                      setOptions(newOptions);
                                     }}
                                   />
 
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <label
-                                          htmlFor={`fileInput-${index}`}
-                                          className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                                          {optionWatch?.image
-                                            ? "Change image"
-                                            : "Choose an image"}
-                                        </label>
-                                      </TooltipTrigger>
-                                      {optionsPreview[index]?.image && (
-                                        <TooltipContent>
-                                          <img
-                                            src={
-                                              optionWatch?.image?.toString() ||
-                                              ""
-                                            }
-                                            alt="Option Preview"
-                                            style={{
-                                              width: "120px",
-                                              height: "auto",
-                                            }}
-                                          />
-                                        </TooltipContent>
-                                      )}
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                </Button>
-                              </div>
+                                  {/* Image Upload for Option */}
+                                  <Button>
+                                    <input
+                                      type="file"
+                                      className="hidden"
+                                      name={`fileInput-${index}`}
+                                      id={`fileInput-${index}`}
+                                      onChange={(e) => {
+                                        if (e.target.files)
+                                          handleOptionImageChange(
+                                            index,
+                                            e.target.files[0]
+                                          );
+                                      }}
+                                    />
 
-                              {/* Remove Option Button */}
-                              <Button
-                                variant="destructive"
-                                type="button"
-                                onClick={() => {
-                                  const newOptions = [...options];
-                                  newOptions.splice(index, 1);
-                                  setOptions(newOptions);
-                                }}>
-                                Remove Option
-                              </Button>
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger>
+                                          <label
+                                            htmlFor={`fileInput-${index}`}
+                                            className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                            {optionWatch?.image
+                                              ? "Change image"
+                                              : "Choose an image"}
+                                          </label>
+                                        </TooltipTrigger>
+                                        {optionsPreview[index]?.image && (
+                                          <TooltipContent>
+                                            <img
+                                              src={
+                                                optionWatch?.image?.toString() ??
+                                                ""
+                                              }
+                                              alt="Option Preview"
+                                              style={{
+                                                width: "120px",
+                                                height: "auto",
+                                              }}
+                                            />
+                                          </TooltipContent>
+                                        )}
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  </Button>
+
+                                  <div className="flex flex-col justify-center items-center space-x-2 p-4">
+                                    <Switch
+                                      id="airplane-mode"
+                                      onClick={() => {
+                                        const updatedOptions = options.map(
+                                          (opt, optIndex) => {
+                                            if (index === optIndex) {
+                                              console.log("trueeeeeeeeeeee");
+                                              return {
+                                                ...opt,
+                                                track: !opt.track,
+                                              };
+                                            }
+                                            return opt;
+                                          }
+                                        );
+
+                                        setOptions(updatedOptions);
+                                      }}
+                                      checked={item.track}
+                                    />
+                                  </div>
+
+                                  {!item.track ? (
+                                    <div className="w-22">
+                                      <Select
+                                        value={
+                                          options[index].inStock
+                                            ? "inStock"
+                                            : "outStock"
+                                        }
+                                        onValueChange={(value) => {
+                                          const updatedOptions = options.map(
+                                            (opt, optIndex) => {
+                                              if (optIndex === index) {
+                                                return {
+                                                  ...opt,
+                                                  inStock: value === "inStock",
+                                                };
+                                              }
+                                              return opt;
+                                            }
+                                          );
+                                          setOptions(updatedOptions);
+                                        }}>
+                                        <SelectTrigger className="w-[180px]">
+                                          <SelectValue placeholder="inStock" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                          <SelectItem value="inStock">
+                                            InStock
+                                          </SelectItem>
+                                          <SelectItem value="outStock">
+                                            Out of stock
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                    </div>
+                                  ) : (
+                                    <div className="w-32">
+                                      <Input
+                                        type="number"
+                                        placeholder="0"
+                                        value={item.quantity}
+                                        onChange={(e) => {
+                                          const newOptions = [...options];
+                                          newOptions[index].quantity =
+                                            parseInt(e.target.value) || 0;
+
+                                          setOptions(newOptions);
+                                        }}
+                                      />
+                                    </div>
+                                  )}
+
+                                  {/* Remove Option Button */}
+                                  <Button
+                                    variant="destructive"
+                                    type="button"
+                                    onClick={() => {
+                                      const newOptions = [...options];
+                                      newOptions.splice(index, 1);
+                                      setOptions(newOptions);
+                                    }}>
+                                    <CircleX />
+                                  </Button>
+                                </div>
+                              </div>
                             </div>
                           );
                         })}
@@ -727,7 +851,9 @@ export function InputForm({
 
             {!trackInv ? (
               <div className="p-2">
-                <Select onValueChange={(value) => setStockStatus(value)}>
+                <Select
+                  value={stockStatus}
+                  onValueChange={(value) => setStockStatus(value)}>
                   <Label>Status</Label>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="inStock" />
