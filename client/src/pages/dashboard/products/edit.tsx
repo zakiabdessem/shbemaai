@@ -16,12 +16,6 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import {
@@ -62,8 +56,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-//TODO: new categorie gets created but no product get pushed into it
 
 function EditProduct() {
   const dispatch = useDispatch();
@@ -550,7 +542,14 @@ export function InputForm({
                           </PopoverContent>
                         </Popover>
                         <FormControl>
-                          <Input type="number" placeholder="0" {...field} />
+                          <Input
+                            type="number"
+                            placeholder="0"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
                         </FormControl>
                         <FormDescription>DA</FormDescription>
 

@@ -7,7 +7,7 @@ import {
   Res,
   Session,
 } from '@nestjs/common';
-import { CartAddDto } from './dtos/cart-add.dto';
+import { CartAddDto, Option } from './dtos/cart-add.dto';
 import { Response } from 'express';
 import { CouponService } from 'src/coupon/coupon.service';
 import { ProductService } from 'src/product/product.service';
@@ -63,51 +63,81 @@ export class CartController {
     @Body() addCartDto: CartAddDto,
     @Res() res: Response,
   ) {
-    // try {
-    //   const product = await this.productService.findOne(addCartDto.product);
-    //   if (!product) throw new Error('Product not found');
-
-    //   if (
-    //     addCartDto.option &&
-    //     !product.options.some((option) => option.name === addCartDto.option)
-    //   ) {
-    //     throw new Error('Invalid options');
-    //   }
-
-    //   if (!product.track && !product.inStock) {
-    //     throw new Error('Out of stock');
-    //   }
-
-    //   if (product.track && product.quantity < addCartDto.quantity) {
-    //     throw new Error('Not enough stock');
-    //   }
-
-    //   if (!session.cart) session.cart = { products: [] };
-
-    //   const existingProductIndex = session.cart.products.findIndex(
-    //     (p) => p.product == product._id,
-    //   );
-
-    //   if (existingProductIndex !== -1) {
-    //     // Update quantity if product exists
-    //     session.cart.products[existingProductIndex].quantity +=
-    //       addCartDto.quantity;
-    //   } else {
-    //     // Add new product if it doesn't exist
-    //     session.cart.products.push({
-    //       product: product._id,
-    //       quantity: addCartDto.quantity,
-    //       option: addCartDto.option,
-    //     });
-    //   }
-
-    //   return res.status(HttpStatus.ACCEPTED).json({
-    //     message: 'Product added',
-    //   });
-    // } catch (error) {
-    //   return res
-    //     .status(HttpStatus.BAD_REQUEST)
-    //     .json({ message: error.message });
-    // } //TODO: Wslt win lazem option of product have quantity
+    try {
+      const product = await this.productService.findOne(addCartDto.product);
+      if (!product) {
+        throw new Error('Product not found');
+      }
+    
+      // Initial check for product option validity
+      let productOption;
+      if (addCartDto.option) {
+        productOption = product.options.find(option => option.name === addCartDto.option);
+        if (!productOption) {
+          throw new Error('Invalid option');
+        }
+    
+        // Check stock for the specified option
+        if (productOption.track && productOption.quantity < addCartDto.quantity) {
+          throw new Error('Not enough stock for the selected option');
+        } else if (!productOption.track && !productOption.inStock) {
+          throw new Error('Selected option is out of stock');
+        }
+      } else {
+        // Check stock for the product itself if no option is specified
+        if (product.track && product.quantity < addCartDto.quantity) {
+          throw new Error('Not enough stock for the product');
+        } else if (!product.track && !product.inStock) {
+          throw new Error('Product is out of stock');
+        }
+      }
+    
+      if (!session.cart) session.cart = { products: [] };
+    
+      const existingProductIndex = session.cart.products.findIndex(
+        cartProduct => cartProduct.product.toString() === product._id.toString(),
+      );
+    
+      if (existingProductIndex !== -1) {
+        // Product exists in the cart
+        const existingProduct = session.cart.products[existingProductIndex];
+    
+        if (addCartDto.option) {
+          // Handle option quantity update
+          const existingOptionIndex = existingProduct.options?.findIndex(
+            opt => opt.name === addCartDto.option,
+          );
+    
+          if (existingOptionIndex >= 0) {
+            // Option exists, update its quantity
+            existingProduct.options[existingOptionIndex].quantity += addCartDto.quantity;
+          } else {
+            // New option for the existing product
+            existingProduct.options.push({
+              name: addCartDto.option,
+              quantity: addCartDto.quantity,
+            });
+          }
+        } else {
+          // No option specified, update product quantity directly
+          existingProduct.quantity += addCartDto.quantity;
+        }
+      } else {
+        // New product, add to cart
+        session.cart.products.push({
+          product: addCartDto.product,
+          options: addCartDto.option ? [{ name: addCartDto.option, quantity: addCartDto.quantity }] : [],
+          quantity: addCartDto.option ? 0 : addCartDto.quantity, // Set quantity to 0 if an option is specified, to avoid confusion
+        });
+      }
+    
+      return res.status(HttpStatus.ACCEPTED).json({
+        message: 'Product added',
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(HttpStatus.BAD_REQUEST).json({ message: error.message });
+    }
+    
   }
 }

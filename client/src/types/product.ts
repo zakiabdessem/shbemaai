@@ -1,6 +1,6 @@
 export interface Category {
   name: string;
-  _id: string | undefined;
+  _id: string;
 }
 
 export interface Option {

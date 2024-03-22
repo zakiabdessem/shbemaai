@@ -1,7 +1,11 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
+export interface Option {
+  name: string;
+  quantity: number;
+}
+
 export class CartAddDto {
-  //TODO: validate Cart
   @IsNotEmpty()
   @IsString()
   product: string;

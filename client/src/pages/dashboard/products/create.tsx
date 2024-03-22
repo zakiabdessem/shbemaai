@@ -50,7 +50,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import useCategories from "@/hooks/categories/useCategories";
 import { useCreateProduct } from "@/hooks/products/useCreateProduct";
 import { useDispatch } from "@/redux/hooks";
-import { Option } from "@/types/product";
+import { Category, Option } from "@/types/product";
 import { Dispatch } from "redux";
 import { TitlePage } from "@/components/PageTitle";
 import { FormSchema } from "@/validator/product";
@@ -134,7 +134,7 @@ function CreateProduct() {
                   All Categories
                 </label>
               </div>
-              {data?.categories.map((category: any) => (
+              {data?.categories.map((category: Category) => (
                 <div className="flex items-center space-x-1" key={category._id}>
                   <Checkbox
                     id={category._id}
@@ -190,16 +190,7 @@ export function InputForm({
   const [trackInv, setTrackinv] = useState(false);
   const [stockStatus, setStockStatus] = useState("inStock");
 
-  const [options, setOptions] = useState<Option[]>([
-    {
-      name: "",
-      image: null,
-      changed: false,
-      track: false,
-      inStock: true,
-      quantity: 0,
-    },
-  ]);
+  const [options, setOptions] = useState<Option[]>([]);
 
   const addOption = () =>
     setOptions([
@@ -223,12 +214,12 @@ export function InputForm({
       description: "",
       image: "",
       price: 0,
-      buisness: 0,
       unit: 10,
       weight: 0,
       sku: "",
       quantity: 0,
       inStock: false,
+      business: 0,
     },
   });
 
@@ -472,7 +463,7 @@ export function InputForm({
                   {/* Business */}
                   <FormField
                     control={form.control}
-                    name="buisness"
+                    name="business"
                     render={({ field }) => (
                       <FormItem className="max-w-20">
                         <FormLabel>Business</FormLabel>
