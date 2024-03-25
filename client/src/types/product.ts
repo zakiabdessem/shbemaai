@@ -10,4 +10,5 @@ export interface Option {
   track: boolean;
   inStock?: boolean;
   quantity?: number;
+  price: number;
 }

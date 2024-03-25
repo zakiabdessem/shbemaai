@@ -52,6 +52,8 @@ export class Option {
   track?: boolean;
 }
 
+// TODO: SHOW IN BUSSINESS OR STORE BUTTON
+
 @ObjectType('Product')
 @Schema({
   timestamps: {

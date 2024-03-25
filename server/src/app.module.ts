@@ -11,6 +11,7 @@ import { OrderController } from './order/order.controller';
 import { OrderModule } from './order/order.module';
 import { CouponModule } from './coupon/coupon.module';
 import { CartModule } from './cart/cart.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import { CartModule } from './cart/cart.module';
     OrderModule,
     CouponModule,
     CartModule,
+    ClientModule
   ],
-  controllers: [OrderController],
+  controllers: [],
   providers: [],
 })
 export class AppModule {}

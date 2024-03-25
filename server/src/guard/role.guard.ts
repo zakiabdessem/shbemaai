@@ -27,8 +27,8 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('No roles found for the user.');
 
     if (user.role === UserRole.SUPER) return true;
-
-    const hasRole = requiredRoles[0] === user.role;
+    
+    const hasRole = requiredRoles.includes(user.role);
     if (!hasRole)
       throw new UnauthorizedException('User does not have the required roles.');
 

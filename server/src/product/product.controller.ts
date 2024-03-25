@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Res,
@@ -88,7 +89,7 @@ export class ProductController {
 
       return res.status(HttpStatus.OK).json({ data: newProduct });
     } catch (error) {
-      console.log(error);
+      Logger.error(error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error',
       });
@@ -164,7 +165,7 @@ export class ProductController {
 
       return res.status(HttpStatus.OK).json({ data: product });
     } catch (error) {
-      console.log(error);
+      Logger.error(error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error',
       });
@@ -182,7 +183,7 @@ export class ProductController {
       const product = await this.prodcutService.findOne(id);
       return res.status(HttpStatus.OK).json({ data: product });
     } catch (error) {
-      console.log(error);
+      Logger.error(error);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error',
       });

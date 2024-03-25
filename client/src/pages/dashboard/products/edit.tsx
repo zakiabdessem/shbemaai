@@ -250,6 +250,7 @@ export function InputForm({
         track: false,
         inStock: true,
         quantity: 0,
+        price: 0,
       },
     ]);
 
@@ -296,7 +297,7 @@ export function InputForm({
     // Filter options with non-empty names
     if (options) {
       options.forEach((option, index) => {
-        if (option.name === "" || option.image === null) {
+        if (option.name === "" || option.image === null || option.price === 0) {
           toast.error(`Option ${index + 1} cannot be empty`, {
             position: "bottom-right",
           });
@@ -649,6 +650,8 @@ export function InputForm({
                         <TableHead>Image</TableHead>
                         <TableHead>Track</TableHead>
                         <TableHead>Inventory</TableHead>
+                        <TableHead>Price</TableHead>
+
                         <TableHead>Remove</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -669,6 +672,7 @@ export function InputForm({
                               <TableCell>
                                 <Input
                                   id={`name-${index}`}
+                                  className="w-32"
                                   placeholder="Option Name"
                                   value={item.name}
                                   onChange={(e) => {
@@ -770,6 +774,24 @@ export function InputForm({
                                   </Select>
                                 )}
                               </TableCell>
+
+                              <TableCell>
+                                <Input
+                                  id="price"
+                                  className="col-span-3 w-32"
+                                  placeholder="Option price"
+                                  value={item.price}
+                                  type="number"
+                                  onChange={(e) => {
+                                    const newOptions = [...options];
+                                    newOptions[index].price = parseInt(
+                                      e.target.value
+                                    );
+                                    setOptions(newOptions);
+                                  }}
+                                />
+                              </TableCell>
+
                               <TableCell>
                                 <Button
                                   variant="destructive"

@@ -210,7 +210,7 @@ function ProductTable({
                 <TableCell className="max-h-16 max-w-16 ">
                   <img
                     src={product?.image ?? ""}
-                    className="min-h-16 min-w-16 rounded-full"
+                    className="h-16 min-w-16 rounded-full"
                     alt=""
                   />
                 </TableCell>

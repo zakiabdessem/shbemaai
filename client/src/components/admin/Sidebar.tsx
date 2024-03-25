@@ -33,13 +33,20 @@ export default function Sidebar() {
     },
     {
       title: "Coupon",
-      href: MAIN_DASHBOARD_URL + "/Coupon",
+      href: MAIN_DASHBOARD_URL + "/coupons",
+      src: asset("sidebar/coupon.png"),
+      gap: true,
+      disabled: false,
+    },
+    {
+      title: "Announcement",
+      href: MAIN_DASHBOARD_URL + "/announce",
       src: asset("sidebar/coupon.png"),
       gap: true,
       disabled: true,
     },
     {
-      title: "Announcement",
+      title: "Business",
       href: MAIN_DASHBOARD_URL + "/announce",
       src: asset("sidebar/coupon.png"),
       gap: true,

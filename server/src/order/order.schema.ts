@@ -1,26 +1,18 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Types } from 'mongoose';
 import { Product } from 'src/product/product.schema';
-import { OrderStatus, PaymentType } from './order.entity';
+import { OrderStatus, OrderType, PaymentType } from './order.entity';
+import { Coupon } from 'src/coupon/coupon.schema';
+import { APP_GUARD } from '@nestjs/core';
+import { Client } from 'src/client/client.schema';
 
 @ObjectType('Cart')
 export class Cart {
   @Field(() => ID, { nullable: true })
   _id?: string;
 
-  @Field(
-    () => [
-      {
-        product: Product,
-        option: {
-          name: String,
-        },
-        quantity: Number,
-      },
-    ],
-    { nullable: true },
-  )
+  @Field(() => [Product], { nullable: true })
   @Prop({
     required: false,
     type: {
@@ -35,19 +27,18 @@ export class Cart {
   products: [
     {
       product: Types.ObjectId;
-      option: {
-        name: string;
-      };
+      options: [{ name: string; quantity: number }];
       quantity: Number;
     },
   ];
 
-  @Field({ nullable: true })
+  @Field(() => Coupon, { nullable: true })
   @Prop({
     required: false,
     type: Types.ObjectId,
+    ref: 'Coupon',
   })
-  coupon: Types.ObjectId; //ila mawch null becarefull it may get deleted from the db
+  coupon: Types.ObjectId;
 
   @Field({ nullable: true })
   @Prop({
@@ -61,13 +52,35 @@ export class Cart {
     required: false,
     type: Number,
   })
-  total: Number;
+  discountedPrice: Number;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  discountPercentage: Number;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+    type: Number,
+  })
+  totalPrice: Number;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+    type: String,
+  })
+  note: String;
 }
 
 @ObjectType('Order')
 @Schema({
   timestamps: {
     createdAt: true,
+    updatedAt: true,
   },
 })
 export class Order {
@@ -75,16 +88,24 @@ export class Order {
   _id?: string;
 
   @Field({ nullable: true })
-  @Prop()
-  orderNumber: Number;
+  @Prop({
+    required: false,
+  })
+  createdAt?: Date;
 
   @Field({ nullable: true })
   @Prop({
     required: false,
-    type: mongoose.Schema.Types.ObjectId,
+  })
+  orderNumber?: Number;
+
+  @Field(() => Client, { nullable: true })
+  @Prop({
+    required: false,
+    type: Types.ObjectId,
     ref: 'Client',
   })
-  client: Types.ObjectId;
+  client?: Types.ObjectId | Client;
 
   @Field(() => Cart, { nullable: true })
   @Prop({
@@ -99,13 +120,26 @@ export class Order {
     required: false,
     type: String,
     enum: OrderStatus,
+    default: 'pending',
   })
   status: String;
 
   @Field({ nullable: true })
   @Prop({
     required: false,
-    type: PaymentType,
+    enum: PaymentType,
+    type: String,
   })
-  paymentType: String;
+  paymentType: PaymentType;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
+    default: 'client',
+    enum: OrderType,
+    type: String,
+  })
+  orderType: OrderType;
 }
+
+export const OrderSchema = SchemaFactory.createForClass(Order);

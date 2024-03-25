@@ -6,6 +6,7 @@ import { Coupon, CouponSchema } from './coupon.schema';
 import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/guard/role.guard';
 import { AuthMiddleware } from 'middleware/auth.middleware';
+import { CouponResolver } from './coupon.resolver';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthMiddleware } from 'middleware/auth.middleware';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    CouponResolver
   ],
   exports: [CouponService],
 

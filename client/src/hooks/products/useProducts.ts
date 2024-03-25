@@ -93,6 +93,7 @@ const GET_DATA_PRODUCT = gql`
         track
         quantity
         inStock
+        price
       }
       show
       promote

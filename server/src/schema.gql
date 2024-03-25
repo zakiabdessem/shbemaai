@@ -2,10 +2,62 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Adress {
+  address: String
+  city: String
+  phone: String
+  state: String
+}
+
+type Cart {
+  _id: ID
+  coupon: Coupon
+  discountPercentage: Float
+  discountedPrice: Float
+  note: String
+  products: [Product!]
+  subTotal: Float
+  totalPrice: Float
+}
+
 type Category {
   _id: ID
   name: String
   products: [Product!]!
+}
+
+type Client {
+  address: Adress
+  clientType: String
+  email: String
+  firstName: ID
+  lastName: String
+}
+
+type Coupon {
+  _id: ID
+  code: String!
+  createdAt: DateTime!
+  discount: Float!
+  expireDate: DateTime!
+  isActive: Boolean!
+  updatedAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Order {
+  _id: ID
+  cart: Cart
+  client: Client
+  createdAt: DateTime
+  orderNumber: Float
+  orderType: String
+  paymentType: String
+  status: String
 }
 
 type Product {
@@ -29,6 +81,8 @@ type Product {
 
 type Query {
   categories: [Category!]!
+  coupons: [Coupon!]!
+  orders: [Order!]!
   product(id: String!): Product!
   products(sortBy: String!): [Product!]!
   productsByCategory(categoryId: String!, sortBy: String!): [Product!]!

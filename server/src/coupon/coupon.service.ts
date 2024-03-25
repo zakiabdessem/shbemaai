@@ -12,17 +12,26 @@ export class CouponService {
     return this.coupontModel.create(createCouponDto);
   }
   async findAll() {
-    return 'find all coupon';
+    return await this.coupontModel.find().lean().exec();
   }
   async findOne(id: string) {
     return await this.coupontModel.findOne({
-      $or: [{ _id: id }, { code: id }],
+      code: id,
     });
   }
+
+  async findOneById(id: string) {
+    return await this.coupontModel.findById(id);
+  }
+
   async update() {
     return 'update coupon';
   }
   async remove() {
     return 'remove coupon';
+  }
+
+  async countDocument() {
+    return this.coupontModel.estimatedDocumentCount() || 0;
   }
 }

@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Logger,
   Post,
   Req,
   Res,
@@ -27,10 +29,16 @@ export class CouponController {
         message: 'Coupon created successfully',
       });
     } catch (error) {
+      Logger.error(error);
       return res
         .status(HttpStatus.BAD_REQUEST)
         .json({ message: error.message });
     }
+  }
+
+  @Get('count')
+  async countDocument() {
+    return await this.couponService.countDocument();
   }
 
 }

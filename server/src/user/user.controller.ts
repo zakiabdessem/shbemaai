@@ -7,6 +7,7 @@ import {
   Req,
   Get,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { UserCreateDto } from './dtos/user-create.dto';
 import { Request, Response } from 'express';
@@ -51,7 +52,7 @@ export class UserController {
         .status(HttpStatus.OK)
         .json({ message: 'Auth Success', token });
     } catch (error) {
-      console.error(error);
+      Logger.error(error);
       return res.status(HttpStatus.UNAUTHORIZED).json({
         statusCode: HttpStatus.UNAUTHORIZED,
         message: 'Authentication failed',
@@ -69,7 +70,7 @@ export class UserController {
 
       return res.status(HttpStatus.OK).json({ message: 'Auth Success' });
     } catch (error) {
-      console.error(error);
+      Logger.error(error);
       return res.status(HttpStatus.UNAUTHORIZED).json({
         statusCode: HttpStatus.UNAUTHORIZED,
         message: 'Authentication failed',

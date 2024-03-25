@@ -1,6 +1,13 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import "./index.css";
+import { MAIN_DASHBOARD_LOGIN, MAIN_DASHBOARD_URL } from "./app/constants";
+import { ApolloProvider } from "@apollo/client";
+import { client } from "./app/ApolloClient";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { Suspense, lazy } from "react";
+
 {
   /* Redux Setup */
 }
@@ -10,54 +17,74 @@ import store from "./redux/Store";
 {
   /* Public Pages */
 }
-import LoginPage from "./pages/auth/admin/loginPage";
+const Home = lazy(() => import("./pages/Home"));
+
 // import RegisterPage from "./pages/Register";
 
 {
   /* Auth Protected Routes */
 }
 import ProtectedRoutes from "./ProtectedRoutes";
+import Orders from "./pages/dashboard/orders/orders";
 
-import "./index.css";
-import Dashboard from "./pages/dashboard/dashboard";
-import Home from "./pages/Home";
-import { MAIN_DASHBOARD_LOGIN, MAIN_DASHBOARD_URL } from "./app/constants";
-import Products from "./pages/dashboard/products/products";
-import { ApolloProvider } from "@apollo/client";
-import { client } from "./app/ApolloClient";
-import CreateProduct from "./pages/dashboard/products/create";
-import { QueryClient, QueryClientProvider } from "react-query";
-import EditProduct from "./pages/dashboard/products/edit";
+const LoginPage = lazy(() => import("./pages/auth/admin/loginPage"));
+const Dashboard = lazy(() => import("./pages/dashboard/dashboard"));
+const Products = lazy(() => import("./pages/dashboard/products/products"));
+const CreateProduct = lazy(() => import("./pages/dashboard/products/create"));
+const EditProduct = lazy(() => import("./pages/dashboard/products/edit"));
+const Coupons = lazy(() => import("./pages/dashboard/coupon/coupons"));
 
+// TODO: Add a loading spinner
 const App = () => {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<Home />} />
-        <Route path={MAIN_DASHBOARD_LOGIN} element={<LoginPage />} />
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center h-screen">
+            <div className="text-3xl font-bold text-gray-800">Loading...</div>
+          </div>
+        }>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<Home />} />
+          <Route path={MAIN_DASHBOARD_LOGIN} element={<LoginPage />} />
 
-        {/* Protected routes */}
-        <Route element={<ProtectedRoutes />}>
-          <Route path={`admin/`} element={<Dashboard />} />
-          <Route path={`${MAIN_DASHBOARD_URL}/`} element={<Dashboard />} />
-          <Route
-            path={`${MAIN_DASHBOARD_URL}/products`}
-            element={<Products />}
-          />
-          <Route
-            path={`${MAIN_DASHBOARD_URL}/products/create`}
-            element={<CreateProduct />}
-          />
-          <Route
-            path={`${MAIN_DASHBOARD_URL}/products/:id`}
-            element={<EditProduct />}
-          />
-        </Route>
+          {/* Protected routes */}
+          <Route element={<ProtectedRoutes />}>
+            <Route path={`admin/`} element={<Dashboard />} />
+            <Route path={`${MAIN_DASHBOARD_URL}/`} element={<Dashboard />} />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/products`}
+              element={<Products />}
+            />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/products/create`}
+              element={<CreateProduct />}
+            />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/products/:id`}
+              element={<EditProduct />}
+            />
 
-        {/* Redirect/Path for handling unmatched routes */}
-        {/* <Route path="*" element={<NotFound />} /> */}
-      </Routes>
+            <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
+            <Route path={`${MAIN_DASHBOARD_URL}/coupons`} element={<Coupons />} />
+
+            <Route
+              path="*"
+              element={
+                <div className="flex justify-center items-center h-screen">
+                  <div className="text-3xl font-bold text-gray-800">
+                    404 Not Found
+                  </div>
+                </div>
+              }
+            />
+          </Route>
+
+          {/* Redirect/Path for handling unmatched routes */}
+          {/* <Route path="*" element={<NotFound />} /> */}
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 };
