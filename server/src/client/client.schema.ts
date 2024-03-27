@@ -7,7 +7,7 @@ export class Adress {
   @Prop({
     required: false,
   })
-  address: String;
+  address: string;
 
   @Field({ nullable: true })
   @Prop({

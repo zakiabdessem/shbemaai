@@ -43,7 +43,17 @@ export class OrderService {
       .exec();
   }
 
+  async findOne(id: string): Promise<Order> {
+    return await this.orderModel.findById(id).exec();
+  }
+
   async countDocument() {
     return this.orderModel.estimatedDocumentCount() || 0;
+  }
+
+  checkIfOrderExpired(createdAt: Date) {
+    const expireDate = new Date(createdAt);
+    expireDate.setDate(expireDate.getDate() + 1);
+    return expireDate > new Date();
   }
 }

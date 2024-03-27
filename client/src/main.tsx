@@ -26,6 +26,7 @@ const Home = lazy(() => import("./pages/Home"));
 }
 import ProtectedRoutes from "./ProtectedRoutes";
 import Orders from "./pages/dashboard/orders/orders";
+import { MoonLoader } from "react-spinners";
 
 const LoginPage = lazy(() => import("./pages/auth/admin/loginPage"));
 const Dashboard = lazy(() => import("./pages/dashboard/dashboard"));
@@ -40,8 +41,8 @@ const App = () => {
     <BrowserRouter>
       <Suspense
         fallback={
-          <div className="flex justify-center items-center h-screen">
-            <div className="text-3xl font-bold text-gray-800">Loading...</div>
+          <div className="fixed inset-0 bg-black bg-opacity-20 z-50 flex justify-center items-center">
+            <MoonLoader size={25} />
           </div>
         }>
         <Routes>
@@ -67,7 +68,10 @@ const App = () => {
             />
 
             <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
-            <Route path={`${MAIN_DASHBOARD_URL}/coupons`} element={<Coupons />} />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/coupons`}
+              element={<Coupons />}
+            />
 
             <Route
               path="*"

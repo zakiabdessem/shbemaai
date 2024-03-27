@@ -19,12 +19,15 @@ import { OrderService } from './order.service';
 import { ClientService } from 'src/client/client.service';
 import { Types } from 'mongoose';
 import { User } from 'src/user/user.schema';
+import { ChargilyService } from 'src/chargily/charigly.service';
+import { Client } from 'src/client/client.schema';
 
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly clientService: ClientService,
+    private readonly chargilyService: ChargilyService,
   ) {}
 
   @Post('client/create')
@@ -33,18 +36,21 @@ export class OrderController {
     @Body() orderCreateDto: OrderCreateDtoClient,
     @Res() res: Response,
   ) {
-    try {
-      if (!session.cart || session.cart?.products?.length < 1) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          message: 'Cart is empty',
-        });
-      }
+    if (!session.cart || session.cart?.products?.length < 1) {
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message: 'Cart is empty',
+      });
+    }
 
+    try {
       //! Already created order
       if (session.cart?.order) {
-        return res.status(HttpStatus.BAD_REQUEST).json({
-          message: 'Order already created',
-        });
+        const order = await this.orderService.findOne(session.cart.order);
+
+        if (this.orderService.checkIfOrderExpired(order.createdAt))
+          return res.status(HttpStatus.BAD_REQUEST).json({
+            message: 'Order already created',
+          });
       }
 
       //! Check willaya and address yalidine user
@@ -55,13 +61,39 @@ export class OrderController {
 
       session.cart.order = createdOrder._id.toString();
 
+      let url;
+      if (orderCreateDto.paymentType == 'cib') {
+        //TODO: create paiment here
+        // const { id: clientId } = await this.chargilyService.createClient(
+        //   orderCreateDto.client as Client,
+        // ); IDK if you need this
+
+        const { id: productId } = await this.chargilyService.createProduct(
+          session.cart,
+        );
+
+        const { id: priceId } = await this.chargilyService.createPrice(
+          productId,
+          session.cart.totalPrice,
+        );
+
+        const { checkout_url } = await this.chargilyService.createCheckout(
+          priceId,
+          createdOrder._id,
+        );
+
+        url = checkout_url;
+      }
+
       return res.status(HttpStatus.CREATED).json({
         message: 'Order created successfully',
+        ...(orderCreateDto.paymentType == 'cib' && { url: Object.values(url).join('') }),
       });
     } catch (error) {
       console.error(error);
       return res.status(HttpStatus.BAD_REQUEST).json({
-        message: error.message,
+        message:
+          'Une erreur est apparue, veuillez changer le mode de paiement pour Cash.',
       });
     }
   }
@@ -70,7 +102,6 @@ export class OrderController {
   async countDocument() {
     return await this.orderService.countDocument();
   }
-
 
   // @Roles(UserRole.BUISNESS, UserRole.ADMIN)
   // @Post('business/create')

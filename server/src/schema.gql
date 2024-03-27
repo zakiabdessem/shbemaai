@@ -84,8 +84,8 @@ type Query {
   coupons: [Coupon!]!
   orders: [Order!]!
   product(id: String!): Product!
-  products(sortBy: String!): [Product!]!
-  productsByCategory(categoryId: String!, sortBy: String!): [Product!]!
+  products(page: String!, sortBy: String!): [Product!]!
+  productsByCategory(categoryId: String!, page: String!, sortBy: String!): [Product!]!
   users: [User!]!
 }
 

@@ -24,13 +24,17 @@ import { Input } from "@/components/ui/input";
 import { Category, Product, useProducts } from "@/hooks/products/useProducts";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { PlusIcon } from "lucide-react";
+import { MoreHorizontal, PlusIcon } from "lucide-react";
+import PaginationComponent from "@/components/Pagination";
+import { useSearchParams } from "react-router-dom";
 
 // TODO: Add table pagination
 
 export default function Products() {
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [sortBy, setSortBy] = useState("");
+
+  const [searchParams] = useSearchParams();
 
   const { products, categories, count, refetch } = useProducts({
     sortBy,
@@ -48,12 +52,8 @@ export default function Products() {
   };
 
   useEffect(() => {
-    refetch();
-  }, [selectedCategoryId, refetch]);
-
-  useEffect(() => {
-    refetch();
-  }, [sortBy, refetch]);
+    refetch(parseInt(searchParams.get("page") ?? "1"));
+  }, [selectedCategoryId, sortBy, refetch, searchParams]);
 
   const [selectedAll, setSelectedAll] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -164,6 +164,7 @@ export default function Products() {
           />
         )}
       </div>
+      <PaginationComponent count={count} />
     </Layout>
   );
 }
@@ -231,11 +232,12 @@ function ProductTable({
                 </TableCell>
                 <TableCell className="text-right">
                   <a href={`${MAIN_DASHBOARD_URL}/products/${product._id}`}>
-                    <img
-                      src={asset("icons/dots.png")}
-                      className="hover:opacity-50 object-contain min-w-5 h-5"
-                      alt="edit"
-                    />
+                    <Button
+                      variant="ghost"
+                      className="hover:opacity-50 object-contain min-w-5 h-5">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="min-w-5 h-5" />
+                    </Button>
                   </a>
                 </TableCell>
               </TableRow>

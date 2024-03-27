@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Product } from './product.schema';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { ProductCreateDto } from './dtos/product-create.dto';
 import { CategoryService } from 'src/category/category.service';
 
@@ -24,31 +24,48 @@ export class ProductService {
     return await newProduct.save();
   }
 
-  async edit(CategoryCreateDto: ProductCreateDto): Promise<Product & { _id: string }> {
+  async edit(
+    CategoryCreateDto: ProductCreateDto,
+  ): Promise<Product & { _id: string }> {
     const product = await this.findOne(CategoryCreateDto['_id']);
     if (!product) return null as any;
 
-    return await (this.productModel
-      .findByIdAndUpdate(CategoryCreateDto['_id'], CategoryCreateDto, {
-        new: true,
-      }) as any).exec();
+    return await (
+      this.productModel.findByIdAndUpdate(
+        CategoryCreateDto['_id'],
+        CategoryCreateDto,
+        {
+          new: true,
+        },
+      ) as any
+    ).exec();
   }
 
-  async findAll(sortBy: string): Promise<Product[]> {
-    if (!sortBy) return await this.productModel.find().exec();
+  async findAll(sortBy: string, page: number): Promise<Product[]> {
+    const Limit = 15;
+    const Skip = (page - 1) * Limit;
+    if (!sortBy)
+      return await this.productModel.find().limit(Limit).skip(Skip).exec();
     if (sortBy == 'stock')
       return await this.productModel
         .find({
           $or: [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }],
         })
         .sort({ inStock: -1, quantity: -1 })
+        .limit(Limit)
+        .skip(Skip)
         .exec();
 
     //sort by createdAt
-    return await this.productModel.find().sort({ createdAt: -1 }).exec();
+    return await this.productModel
+      .find()
+      .limit(Limit)
+      .skip(Skip)
+      .sort({ createdAt: -1 })
+      .exec();
   }
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(id: string | Types.ObjectId): Promise<Product> {
     return await this.productModel.findById(id);
   }
 

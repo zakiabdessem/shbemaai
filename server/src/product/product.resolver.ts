@@ -21,13 +21,18 @@ export class ProductResolver {
   async productsByCategory(
     @Args('categoryId') categoryId: string,
     @Args('sortBy') sortBy: string,
+    @Args('page') page: string,
   ): Promise<Product[]> {
+    console.log(page);
     return await this.productService.findAllByCategoryId(categoryId, sortBy);
   }
 
   @Query(() => [Product])
-  async products(@Args('sortBy') sortBy: string): Promise<Product[]> {
-    return this.productService.findAll(sortBy);
+  async products(
+    @Args('sortBy') sortBy: string,
+    @Args('page') page: string,
+  ): Promise<Product[]> {
+    return this.productService.findAll(sortBy, parseInt(page));
   }
 
   @ResolveField('categories', () => [Category])

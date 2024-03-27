@@ -32,8 +32,8 @@ export interface Category {
 }
 
 const GET_DATA_PRODUCTS = gql`
-  query GetData($sortBy: String!) {
-    products(sortBy: $sortBy) {
+  query GetData($sortBy: String!, $page: String!) {
+    products(sortBy: $sortBy, page: $page) {
       _id
       description
       name
@@ -51,8 +51,16 @@ const GET_DATA_PRODUCTS = gql`
 `;
 
 const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
-  query GetData($selectedCategoryId: String!, $sortBy: String!) {
-    productsByCategory(categoryId: $selectedCategoryId, sortBy: $sortBy) {
+  query GetData(
+    $selectedCategoryId: String!
+    $sortBy: String!
+    $page: String!
+  ) {
+    productsByCategory(
+      categoryId: $selectedCategoryId
+      sortBy: $sortBy
+      page: $page
+    ) {
       _id
       description
       name
@@ -104,6 +112,7 @@ const GET_DATA_PRODUCT = gql`
 
 const useProduct = (productId: string) => {
   const query = GET_DATA_PRODUCT;
+  // get page url query
 
   const { error: errorProduct, data: product } = useQuery(query, {
     variables: {
@@ -120,6 +129,17 @@ const useProduct = (productId: string) => {
   return product?.product;
 };
 
+const getSortValue = (sortBy: string) => {
+  switch (sortBy) {
+    case "date":
+      return "date";
+    case "stock":
+      return "stock";
+    default:
+      return "all";
+  }
+};
+
 const useProducts = ({
   sortBy,
   selectedCategoryId,
@@ -127,28 +147,21 @@ const useProducts = ({
   sortBy: string;
   selectedCategoryId: string;
 }) => {
-  const {
-    count,
-    isLoadingCount,
-    error: errorCount,
-    refetch: refetchCount,
-  } = useCount(selectedCategoryId || "");
+  const { count, isLoadingCount, error: errorCount } = useCount("");
+
+  const [page, setPage] = useState(1);
 
   const isCategorySort = Boolean(selectedCategoryId);
-  const isDateSort = sortBy === "date";
-  const isStockSort = sortBy === "stock";
 
   const query = isCategorySort
     ? GET_DATA_PRODUCTS_BY_CATEGORY
     : GET_DATA_PRODUCTS;
-  const variables = isCategorySort
-    ? {
-        selectedCategoryId,
-        sortBy: isDateSort ? "date" : isStockSort ? "stock" : "all",
-      }
-    : {
-        sortBy: isDateSort ? "date" : isStockSort ? "stock" : "all",
-      };
+
+  const variables = {
+    sortBy: getSortValue(sortBy),
+    page: page.toString(),
+    ...(isCategorySort && { selectedCategoryId }),
+  };
 
   const {
     loading: loadingProducts,
@@ -173,9 +186,9 @@ const useProducts = ({
 
   const isLoading = loadingProducts || isLoadingCount || loadingCategories;
 
-  const refetchProducts = () => {
+  const refetchProducts = (pagination: number) => {
+    setPage(pagination);
     refetch();
-    refetchCount();
   };
 
   return {

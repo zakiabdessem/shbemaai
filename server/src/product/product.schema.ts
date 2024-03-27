@@ -145,6 +145,7 @@ export class Product {
     ref: 'Category',
   })
   categories: (Types.ObjectId | string)[];
+
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
