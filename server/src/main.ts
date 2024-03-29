@@ -11,7 +11,11 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const options = {
-    origin: ['http://localhost:5173', '/chebaani.com$/'],
+    origin: [
+      'http://localhost:5173',
+      '/chebaani.com$/',
+      'http://localhost:3001',
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
