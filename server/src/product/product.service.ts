@@ -41,7 +41,10 @@ export class ProductService {
     ).exec();
   }
 
-  async findAll(sortBy: string, page: number): Promise<Product[]> {
+  async findAll(
+    sortBy: string,
+    page: number,
+  ): Promise<Product[]> {
     const Limit = 15;
     const Skip = (page - 1) * Limit;
     if (!sortBy)
@@ -62,6 +65,21 @@ export class ProductService {
       .limit(Limit)
       .skip(Skip)
       .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async findRelevant() {
+    return await this.productModel
+      .find({
+        $or: [
+          { track: true, quantity: { $gt: 0 } },
+          { track: false, inStock: true },
+        ],
+      })
+      .limit(3)
+      .sort({
+        createdAt: 1,
+      })
       .exec();
   }
 

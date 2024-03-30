@@ -35,6 +35,12 @@ export class ProductResolver {
     return this.productService.findAll(sortBy, parseInt(page));
   }
 
+  @Query(() => [Product])
+  async relevantProducts(
+  ): Promise<Product[]> {
+    return this.productService.findRelevant();
+  }
+
   @ResolveField('categories', () => [Category])
   async getCategory(@Parent() product: Product) {
     return this.categoryService.findAllById(product.categories);
