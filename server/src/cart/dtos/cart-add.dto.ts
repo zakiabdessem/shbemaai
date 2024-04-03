@@ -20,6 +20,20 @@ export class CartAddDto {
   quantity: number;
 }
 
+export class CartDeleteDto {
+  @IsNotEmpty()
+  @IsString()
+  product: string;
+
+  @IsOptional()
+  @IsString()
+  option?: string;
+
+  @IsOptional()
+  @IsNumber()
+  quantity: number;
+}
+
 export class CartAddCouponDto {
   @IsNotEmpty()
   @IsString()

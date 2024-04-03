@@ -12,6 +12,7 @@ import {
 import {
   CartAddCouponDto,
   CartAddDto,
+  CartDeleteDto,
   addCartNoteDto,
 } from './dtos/cart-add.dto';
 import { Response } from 'express';
@@ -29,10 +30,23 @@ export class CartController {
   @Get()
   async get(@Session() session: Record<string, any>, @Res() res: Response) {
     try {
+      let productPromises;
+      if (session.cart?.products?.length > 0) {
+        productPromises = session.cart.products.map((item) =>
+          this.productService.findOne(item.product),
+        );
+      }
+
       return res.status(HttpStatus.OK).json({
-        cart: session.cart || {},
+        cart: {
+          ...session.cart,
+          productsData: productPromises
+            ? await Promise.all(productPromises)
+            : [],
+        },
       });
     } catch (error) {
+      console.error(error);
       return res
         .status(HttpStatus.BAD_REQUEST)
         .json({ message: error.message });
@@ -47,13 +61,13 @@ export class CartController {
   ) {
     try {
       if (!addCouponDto.code || addCouponDto.code === '')
-        throw new Error('Coupon code is required');
+        throw new Error('Le code promo est requis');
 
       const coupon = await this.couponService.findOne(addCouponDto.code);
-      if (!coupon) throw new Error('Coupon not found');
+      if (!coupon) throw new Error('Coupon introuvable');
 
       if (session.cart?.coupon == coupon._id) {
-        throw new Error('A coupon is already applied');
+        throw new Error('Un coupon est déjà appliqué');
       }
 
       //coupon expiration data check
@@ -61,7 +75,7 @@ export class CartController {
         coupon.expireDate &&
         new Date(coupon.expireDate.toString()) < new Date()
       ) {
-        throw new Error('Coupon expired');
+        throw new Error('Coupon expiré');
       }
 
       session.cart = {
@@ -77,6 +91,7 @@ export class CartController {
 
       return res.status(HttpStatus.ACCEPTED).json({
         message: 'Coupon added',
+        discountedPrice: session.cart.discountedPrice,
       });
     } catch (error) {
       Logger.error(error);
@@ -85,6 +100,8 @@ export class CartController {
         .json({ message: error.message });
     }
   }
+
+  //change quantity
 
   @Post('add/product')
   async add(
@@ -182,10 +199,10 @@ export class CartController {
     }
   }
 
-  @Delete('remove/product')
+  @Post('remove/product')
   async remove(
     @Session() session: Record<string, any>,
-    @Body() addCartDto: CartAddDto,
+    @Body() addCartDto: CartDeleteDto,
     @Res() res: Response,
   ) {
     try {
@@ -224,6 +241,11 @@ export class CartController {
               addCartDto.quantity;
           } else {
             existingProduct.options.splice(existingOptionIndex, 1);
+            if (
+              existingProduct.options.length == 0 &&
+              existingProduct.quantity == 0
+            )
+              session.cart.products.splice(existingProductIndex, 1);
           }
         } else {
           throw new Error('Option not found');
@@ -243,7 +265,7 @@ export class CartController {
         message: 'Product removed',
       });
     } catch (error) {
-      Logger.error(error);
+      console.log(error);
       return res
         .status(HttpStatus.BAD_REQUEST)
         .json({ message: error.message });

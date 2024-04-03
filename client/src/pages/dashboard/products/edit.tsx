@@ -473,7 +473,7 @@ export function InputForm({
 
                           <label
                             htmlFor="fileInput"
-                            className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
+                            className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
                             <span className="whitespace-nowrap">
                               {selectedImage instanceof File
                                 ? selectedImage.name
@@ -677,7 +677,12 @@ export function InputForm({
                                   value={item.name}
                                   onChange={(e) => {
                                     const newOptions = [...options];
-                                    newOptions[index].name = e.target.value;
+                                    const modifiedOption = {
+                                      ...newOptions[index],
+                                      name: e.target.value,
+                                    };
+                                    newOptions[index] = modifiedOption;
+
                                     setOptions(newOptions);
                                   }}
                                 />
