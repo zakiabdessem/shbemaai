@@ -27,6 +27,7 @@ const Home = lazy(() => import("./pages/Home"));
 import ProtectedRoutes from "./ProtectedRoutes";
 import Orders from "./pages/dashboard/orders/orders";
 import { MoonLoader } from "react-spinners";
+import { CreateCoupon } from "./pages/dashboard/coupon/create";
 
 const LoginPage = lazy(() => import("./pages/auth/admin/loginPage"));
 const Dashboard = lazy(() => import("./pages/dashboard/dashboard"));
@@ -66,11 +67,14 @@ const App = () => {
               path={`${MAIN_DASHBOARD_URL}/products/:id`}
               element={<EditProduct />}
             />
-
             <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
             <Route
               path={`${MAIN_DASHBOARD_URL}/coupons`}
               element={<Coupons />}
+            />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/coupons/create`}
+              element={<CreateCoupon />}
             />
 
             <Route

@@ -15,6 +15,7 @@ async function bootstrap() {
       'http://localhost:5173',
       '/chebaani.com$/',
       'http://localhost:3001',
+      'http://localhost:3000',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,

@@ -85,6 +85,7 @@ type Query {
   orders: [Order!]!
   product(id: String!): Product!
   products(page: String!, sortBy: String!): [Product!]!
+  productsByCategories(categoryId: String!, page: String!, sortBy: String!): [Product!]!
   productsByCategory(categoryId: String!, page: String!, sortBy: String!): [Product!]!
   relevantProducts: [Product!]!
   users: [User!]!

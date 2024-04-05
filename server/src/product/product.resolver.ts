@@ -23,8 +23,16 @@ export class ProductResolver {
     @Args('sortBy') sortBy: string,
     @Args('page') page: string,
   ): Promise<Product[]> {
-    console.log(page);
     return await this.productService.findAllByCategoryId(categoryId, sortBy);
+  }
+
+  @Query(() => [Product])
+  async productsByCategories(
+    @Args('categoryId') categoryId: string,
+    @Args('sortBy') sortBy: string,
+    @Args('page') page: string,
+  ): Promise<Product[]> {
+    return await this.productService.findAllByCategoriesId(categoryId, sortBy);
   }
 
   @Query(() => [Product])
@@ -36,8 +44,7 @@ export class ProductResolver {
   }
 
   @Query(() => [Product])
-  async relevantProducts(
-  ): Promise<Product[]> {
+  async relevantProducts(): Promise<Product[]> {
     return this.productService.findRelevant();
   }
 

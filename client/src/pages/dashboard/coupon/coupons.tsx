@@ -14,7 +14,7 @@ import { useCoupons } from "@/hooks/coupons/useCoupons";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import moment from "moment";
-import { PlusIcon } from "lucide-react";
+import { Delete, DeleteIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 // TODO: Add table pagination
 
@@ -26,7 +26,7 @@ export default function Coupons() {
     <Layout>
       <div className="flex max-sm:flex-col justify-between p-2">
         <TitlePage count={count} />
-        <a href={`${MAIN_DASHBOARD_URL}/products/create`}>
+        <a href={`${MAIN_DASHBOARD_URL}/coupons/create`}>
           <Button>
             <PlusIcon className="mr-2" width={16} height={16} />
             Create Coupon
@@ -94,6 +94,9 @@ function ProductTable({ coupons }: { coupons: Coupon[] }) {
                   {
                     // Todo : Add model for coupon
                   }
+                  <Button variant="destructive">
+                    <DeleteIcon />
+                  </Button>
                 </TableCell>
               </TableRow>
             );

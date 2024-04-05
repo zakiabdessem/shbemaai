@@ -9,14 +9,23 @@ export class CouponService {
   constructor(@InjectModel(Coupon.name) private coupontModel: Model<Coupon>) {}
 
   async create(createCouponDto: CouponCreateDto) {
-    return this.coupontModel.create(createCouponDto);
+    return this.coupontModel.create({
+      ...createCouponDto,
+      code: createCouponDto.code.toLowerCase(),
+    });
   }
   async findAll() {
     return await this.coupontModel.find().lean().exec();
   }
   async findOne(id: string) {
     return await this.coupontModel.findOne({
-      code: id,
+      code: id.toLowerCase(),
+    });
+  }
+
+  async findOneAndDelete(id: string) {
+    return await this.coupontModel.findOneAndDelete({
+      code: id.toLowerCase(),
     });
   }
 

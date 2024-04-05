@@ -7,6 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { RolesGuard } from 'src/guard/role.guard';
 import { AuthMiddleware } from 'middleware/auth.middleware';
 import { CouponResolver } from './coupon.resolver';
+import { OrderModule } from 'src/order/order.module';
 
 @Module({
   imports: [
@@ -19,13 +20,12 @@ import { CouponResolver } from './coupon.resolver';
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
-    CouponResolver
+    CouponResolver,
   ],
   exports: [CouponService],
-
 })
 export class CouponModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-     consumer.apply(AuthMiddleware).exclude().forRoutes(CouponController);
+    consumer.apply(AuthMiddleware).exclude().forRoutes(CouponController);
   }
 }

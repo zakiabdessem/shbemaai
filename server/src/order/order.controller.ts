@@ -87,7 +87,9 @@ export class OrderController {
 
       return res.status(HttpStatus.CREATED).json({
         message: 'Order created successfully',
-        ...(orderCreateDto.paymentType == 'cib' && { url: Object.values(url).join('') }),
+        ...(orderCreateDto.paymentType == 'cib' && {
+          url: Object.values(url).join(''),
+        }),
       });
     } catch (error) {
       console.error(error);

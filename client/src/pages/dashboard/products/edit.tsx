@@ -874,7 +874,7 @@ export function InputForm({
           </div>
 
           <Button className="my-5" type="submit" size="lg" color="primary">
-            Create Product
+            Edit Product
           </Button>
         </form>
       </div>

@@ -41,10 +41,7 @@ export class ProductService {
     ).exec();
   }
 
-  async findAll(
-    sortBy: string,
-    page: number,
-  ): Promise<Product[]> {
+  async findAll(sortBy: string, page: number): Promise<Product[]> {
     const Limit = 15;
     const Skip = (page - 1) * Limit;
     if (!sortBy)
@@ -55,6 +52,16 @@ export class ProductService {
           $or: [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }],
         })
         .sort({ inStock: -1, quantity: -1 })
+        .limit(Limit)
+        .skip(Skip)
+        .exec();
+
+    if (sortBy == 'date')
+      return await this.productModel
+        .find({
+          $or: [{ inStock: true }, { quantity: { $exists: true, $ne: 0 } }],
+        })
+        .sort({ inStock: -1, quantity: -1, createdAt: -1 })
         .limit(Limit)
         .skip(Skip)
         .exec();
@@ -95,6 +102,31 @@ export class ProductService {
     if (!mongoose.Types.ObjectId.isValid(categoryId)) return [];
 
     const query = { categories: categoryId };
+    let sortQuery = {};
+
+    // Define sort options
+    if (sortBy === 'stock') {
+      query['$or'] = [
+        { inStock: true },
+        { quantity: { $exists: true, $ne: 0 } },
+      ];
+      sortQuery = { inStock: -1, quantity: -1 };
+    } else {
+      sortQuery = { createdAt: -1 };
+    }
+
+    // Execute query
+    return await this.productModel.find(query).sort(sortQuery).exec();
+  }
+
+  async findAllByCategoriesId(
+    categoryId: string,
+    sortBy: string,
+  ): Promise<Product[]> {
+    let query =
+      categoryId !== 'all'
+        ? { categories: { $in: categoryId.split(',') } }
+        : {};
     let sortQuery = {};
 
     // Define sort options

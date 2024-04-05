@@ -7,6 +7,18 @@ import {
   APP_SET_LOADING,
   APP_CLEAR_LOADING,
 } from "./appTypes";
+import { Dispatch } from "redux";
+
+export const setError = (error: string) => ({
+  type: APP_SET_ERROR,
+  payload: { error },
+});
+
+export const dispatchDelayedError = (error: string) => (dispatch: Dispatch) => {
+  setTimeout(() => {
+    dispatch(setError(error));
+  }, 2000);
+};
 
 const initialState: initialAppStateType = {
   error: null,
@@ -16,7 +28,7 @@ const initialState: initialAppStateType = {
 
 export default function (
   state: initialAppStateType = initialState,
-  action: AppErrorActionType,
+  action: AppErrorActionType
 ) {
   switch (action.type) {
     case APP_SET_LOADING:
@@ -42,7 +54,7 @@ export default function (
         action.payload ? action.payload.success : "Successful operation",
         {
           position: "bottom-right",
-        },
+        }
       );
       return {
         ...state,

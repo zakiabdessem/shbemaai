@@ -53,6 +53,13 @@ export class CartController {
     }
   }
 
+  @Get('count') async getCount(
+    @Session() session: Record<string, any>,
+    @Res() res: Response,
+  ) {
+    return res.status(HttpStatus.OK).json(session.cart?.products?.length || 0);
+  }
+
   @Post('add/coupon')
   async addCoupon(
     @Session() session: Record<string, any>,
@@ -64,7 +71,8 @@ export class CartController {
         throw new Error('Le code promo est requis');
 
       const coupon = await this.couponService.findOne(addCouponDto.code);
-      if (!coupon) throw new Error('Coupon introuvable');
+      if (!coupon || !coupon.isActive)
+        throw new Error('Coupon introuvable ou pas actif');
 
       if (session.cart?.coupon == coupon._id) {
         throw new Error('Un coupon est déjà appliqué');
@@ -94,14 +102,11 @@ export class CartController {
         discountedPrice: session.cart.discountedPrice,
       });
     } catch (error) {
-      Logger.error(error);
       return res
         .status(HttpStatus.BAD_REQUEST)
         .json({ message: error.message });
     }
   }
-
-  //change quantity
 
   @Post('add/product')
   async add(

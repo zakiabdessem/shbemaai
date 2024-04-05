@@ -12,7 +12,7 @@ import { ChargilyModule } from 'src/chargily/chargily.module';
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     ClientModule,
-    ChargilyModule
+    ChargilyModule,
   ],
   providers: [OrderResolver, OrderService],
   controllers: [OrderController],
@@ -20,6 +20,6 @@ import { ChargilyModule } from 'src/chargily/chargily.module';
 export class OrderModule {
   constructor(private orderService: OrderService) {}
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).exclude().forRoutes("order/business/create");
+    consumer.apply(AuthMiddleware).exclude().forRoutes('order/business/create');
   }
 }
