@@ -13,13 +13,13 @@ export class Adress {
   @Prop({
     required: false,
   })
-  city: string;
+  willaya: string;
 
   @Field({ nullable: true })
   @Prop({
     required: false,
   })
-  state: string;
+  commun: string;
 
   @Field({ nullable: true })
   @Prop()
@@ -53,6 +53,13 @@ export class Client {
     type: Adress,
   })
   address: Adress;
+
+  @Field(() => String, { nullable: true })
+  @Prop({
+    required: false,
+    type: String,
+  })
+  note: string;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);

@@ -1,5 +1,5 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { OrderType, PaymentType } from '../order.entity';
+import { IsBoolean, IsEnum, IsNotEmpty } from 'class-validator';
+import { PaymentType } from '../order.entity';
 import { ClientCreateDto } from 'src/client/dtos/create-client.dto';
 
 export class OrderCreateDtoClient {
@@ -9,6 +9,10 @@ export class OrderCreateDtoClient {
 
   @IsNotEmpty()
   client: ClientCreateDto;
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isStopDesk: boolean;
 }
 
 export class OrderCreateDtoBussiness {

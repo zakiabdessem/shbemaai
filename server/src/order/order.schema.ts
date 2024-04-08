@@ -122,7 +122,7 @@ export class Order {
     enum: OrderStatus,
     default: 'pending',
   })
-  status: String;
+  orderStatus: String;
 
   @Field({ nullable: true })
   @Prop({
@@ -135,11 +135,25 @@ export class Order {
   @Field({ nullable: true })
   @Prop({
     required: false,
+    type: String,
+  })
+  checkoutId?: string;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: false,
     default: 'client',
     enum: OrderType,
     type: String,
   })
   orderType: OrderType;
+
+  @Field({ nullable: true })
+  @Prop({
+    required: true,
+    type: Boolean,
+  })
+  isStopDesk: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

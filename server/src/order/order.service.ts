@@ -23,6 +23,7 @@ export class OrderService {
       cart,
       client: await this.clientService.create(orderCreateDto.client),
       paymentType: orderCreateDto.paymentType,
+      isStopDesk: orderCreateDto.isStopDesk,
     });
     return newOrder.save();
   }
@@ -44,9 +45,30 @@ export class OrderService {
   }
 
   async findOne(id: string): Promise<Order> {
-    return await this.orderModel.findById(id).exec();
+    return await this.orderModel.findById(id).populate('client').exec();
   }
 
+  async pushCheckoutId(id: string, checkoutId): Promise<Order> {
+    return await this.orderModel
+      .findByIdAndUpdate(id, {
+        checkoutId,
+      })
+      .exec();
+  }
+
+  async updateStatusById(id, stauts) {
+    const order = await this.orderModel
+      .findByIdAndUpdate(id, { orderStatus: stauts })
+      .exec();
+    return order;
+  }
+
+  async updateStatusByCheckoutId(checkoutId, stauts) {
+    const order = await this.orderModel
+      .findOneAndUpdate({ checkoutId }, { orderStatus: stauts })
+      .exec();
+    return order;
+  }
 
   async countDocument() {
     return this.orderModel.estimatedDocumentCount() || 0;

@@ -8,7 +8,9 @@ import helmet from 'helmet';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+  });
 
   const options = {
     origin: [
@@ -26,7 +28,8 @@ async function bootstrap() {
   app.enableCors(options);
   app.use(cookieParser());
 
-  app.use(json({ limit: '50mb' }));
+  app.useBodyParser('json', { limit: '10mb' });
+
   app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   app.use(

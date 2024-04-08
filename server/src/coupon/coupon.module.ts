@@ -16,7 +16,7 @@ import { OrderModule } from 'src/order/order.module';
   controllers: [CouponController],
   providers: [
     CouponService,
-    {
+    { 
       provide: APP_GUARD,
       useClass: RolesGuard,
     },

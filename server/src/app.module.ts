@@ -12,10 +12,13 @@ import { OrderModule } from './order/order.module';
 import { CouponModule } from './coupon/coupon.module';
 import { CartModule } from './cart/cart.module';
 import { ClientModule } from './client/client.module';
+import { ChargilyModule } from './chargily/chargily.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     MongooseModule.forRoot(process.env.MONGO_URI),
     GraphqlModule,
     UserModule,
@@ -25,7 +28,8 @@ import { ClientModule } from './client/client.module';
     OrderModule,
     CouponModule,
     CartModule,
-    ClientModule
+    ClientModule,
+    ChargilyModule,
   ],
   controllers: [],
   providers: [],

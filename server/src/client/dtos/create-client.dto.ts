@@ -42,4 +42,7 @@ export class ClientCreateDto {
   user?: Types.ObjectId;
 
   address: AdressCreateDto;
+
+  @IsOptional()
+  note: string
 }

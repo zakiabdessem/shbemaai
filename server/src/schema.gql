@@ -4,9 +4,9 @@
 
 type Adress {
   address: String
-  city: String
+  commun: String
   phone: String
-  state: String
+  willaya: String
 }
 
 type Cart {
@@ -32,6 +32,7 @@ type Client {
   email: String
   firstName: ID
   lastName: String
+  note: String
 }
 
 type Coupon {
@@ -52,12 +53,14 @@ scalar DateTime
 type Order {
   _id: ID
   cart: Cart
+  checkoutId: String
   client: Client
   createdAt: DateTime
+  isStopDesk: Boolean
   orderNumber: Float
+  orderStatus: String
   orderType: String
   paymentType: String
-  status: String
 }
 
 type Product {

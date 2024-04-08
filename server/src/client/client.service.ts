@@ -11,11 +11,6 @@ export class ClientService {
   ) {}
 
   async create(clientCreateDto: ClientCreateDto): Promise<Types.ObjectId> {
-    const client = await this.clientModel.findOne({
-      email: clientCreateDto.email,
-    });
-    if (client) return client._id;
-
     const newClient = await this.clientModel.create(clientCreateDto);
     return newClient._id;
   }

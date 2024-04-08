@@ -36,6 +36,7 @@
     "@nestjs/throttler": "^5.1.2",
     "@nestjs/websockets": "^10.3.3",
     "@types/bcryptjs": "^2.4.6",
+    "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "buffer-to-stream": "^1.0.0",

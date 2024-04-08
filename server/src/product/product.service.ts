@@ -83,7 +83,7 @@ export class ProductService {
           { track: false, inStock: true },
         ],
       })
-      .limit(3)
+      .limit(4)
       .sort({
         createdAt: 1,
       })
