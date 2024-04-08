@@ -14,7 +14,7 @@ import { useCoupons } from "@/hooks/coupons/useCoupons";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import moment from "moment";
-import { Delete, DeleteIcon, PlusIcon } from "lucide-react";
+import { DeleteIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 // TODO: Add table pagination
 

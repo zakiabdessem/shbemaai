@@ -5,25 +5,28 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const GET_DATA_ORDERS = gql`
-  query GetData{
+  query GetData {
     orders {
       _id
-      status
+      orderStatus
       paymentType
       createdAt
+      isStopDesk
       cart {
         products {
           quantity
         }
         totalPrice
         subTotal
+        note
       }
       client {
         firstName
         lastName
         address {
-          city
+          willaya
           phone
+          commun
         }
       }
     }
