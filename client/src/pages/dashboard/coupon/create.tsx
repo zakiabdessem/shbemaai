@@ -129,7 +129,7 @@ export function CreateCoupon() {
                 name="expireDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col mt-3 max-w-64">
-                    <FormLabel>Date</FormLabel>
+                    <FormLabel>Expiration Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button

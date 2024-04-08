@@ -15,6 +15,7 @@ import moment from "moment";
 import { capitalize } from "lodash";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
@@ -26,25 +27,46 @@ import { instance } from "@/app/axios";
 import { useState } from "react";
 import HorizontalCard from "@/components/HorizontalCard";
 import { Product } from "@/hooks/products/useProducts";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useDispatch } from "@/redux/hooks";
+import { toast } from "react-toastify";
+import { APP_SET_ERROR } from "@/redux/app/appTypes";
 // TODO: Add table pagination
 
 export default function Products() {
   // const [sortBy, setSortBy] = useState("");
-  const { orders, count } = useOrders();
+  const { orders, count, refetch } = useOrders();
 
   return (
     <Layout>
       <TitlePage count={count} />
       <div className="bg-white rounded-md">
-        {orders && <ProductTable orders={orders} />}
+        {orders && <ProductTable orders={orders} refetch={refetch} />}
       </div>
     </Layout>
   );
 }
 
-function ProductTable({ orders }: { orders: Order[] }) {
+function ProductTable({
+  orders,
+  refetch,
+}: {
+  orders: Order[];
+  refetch: () => void;
+}) {
+  const dispatch = useDispatch();
   const [selectedOrder, setSelectedOrder] = useState<Order>();
   const [productsData, setProductsData] = useState<Product[]>();
+  const [status, setStauts] = useState("");
+
   const handleOrderSelect = async (id: string) => {
     try {
       const res = await instance.post("order/single", {
@@ -56,6 +78,40 @@ function ProductTable({ orders }: { orders: Order[] }) {
       console.error(error);
     }
   };
+
+  const handleStatusChange = async (value: string) => {
+    setStauts(value);
+  };
+
+  const handleSubmit = async (id: string) => {
+    if (!status) return;
+    dispatch({
+      type: "APP_SET_LOADING",
+    });
+
+    await instance
+      .post("/order/update", {
+        id,
+        status,
+      })
+      .then(() => toast.success("Successfully updated order"))
+      .catch((error) => {
+        dispatch({
+          type: APP_SET_ERROR,
+          payload: {
+            error: error.response.data.message || "something went wrong",
+          },
+        });
+      });
+
+    setStauts("");
+
+    dispatch({
+      type: "APP_CLEAR_LOADING",
+    });
+
+    refetch();
+  };
   return (
     <Table>
       <TableCaption className="p-2">
@@ -66,7 +122,7 @@ function ProductTable({ orders }: { orders: Order[] }) {
           <TableHead className="w-[50px]"></TableHead>
 
           <TableHead>OrderAt</TableHead>
-          <TableHead>Client</TableHead>
+          <TableHead className="w-fit">Client</TableHead>
           <TableHead className="text-left">SubPrice</TableHead>
           <TableHead className="text-left">TotalPrice</TableHead>
           <TableHead>City</TableHead>
@@ -281,6 +337,7 @@ function ProductTable({ orders }: { orders: Order[] }) {
                                                             data.image || ""
                                                           }
                                                           quantity={_.quantity}
+                                                          option=""
                                                         />
                                                       )}
                                                       {_.options?.length > 0 &&
@@ -311,8 +368,7 @@ function ProductTable({ orders }: { orders: Order[] }) {
                                                                           dataOption.price
                                                                         }
                                                                         image={
-                                                                          dataOption.image ||
-                                                                          ""
+                                                                          dataOption.image as string
                                                                         }
                                                                         quantity={
                                                                           option.quantity
@@ -341,7 +397,58 @@ function ProductTable({ orders }: { orders: Order[] }) {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="submit">Save changes</Button>
+                        <div className="flex justify-center items-center gap-2 w-full">
+                          <div className="flex flex-col justify-center items-center">
+                            <div className="flex gap-4">
+                              <DialogClose>
+                                <Button
+                                  type="submit"
+                                  onClick={() => handleSubmit(order._id)}>
+                                  Update Status
+                                </Button>
+                              </DialogClose>
+                              <Select
+                                onValueChange={(value) =>
+                                  handleStatusChange(value)
+                                }>
+                                <SelectTrigger className="w-[180px]">
+                                  <SelectValue placeholder="Stauts" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectGroup>
+                                    <SelectLabel>Stauts</SelectLabel>
+                                    <SelectItem value="pending">
+                                      Pending
+                                    </SelectItem>
+                                    <SelectItem value="canceled">
+                                      Canceled
+                                    </SelectItem>
+                                    <SelectItem value="confirmed">
+                                      Confirmed
+                                    </SelectItem>
+                                    <SelectItem value="delivered">
+                                      Delivered
+                                    </SelectItem>
+                                    <SelectItem value="returned">
+                                      Returned
+                                    </SelectItem>
+                                  </SelectGroup>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <p className="text-sm p-2 text-center text-gray-500">
+                              (Vérifiez si le paiement en ligne a été effectué
+                              ou non dans{" "}
+                              <a
+                                href="https://pay.chargily.com/"
+                                target="_blanc"
+                                className="text-blue-500">
+                                Chargily.
+                              </a>
+                              )
+                            </p>
+                          </div>
+                        </div>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
