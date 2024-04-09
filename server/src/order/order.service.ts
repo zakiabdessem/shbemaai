@@ -6,7 +6,6 @@ import {
   OrderCreateDtoBussiness,
   OrderCreateDtoClient,
 } from './dtos/create-order.dto';
-import { Response } from 'express';
 import { ClientService } from 'src/client/client.service';
 
 @Injectable()
@@ -35,11 +34,38 @@ export class OrderService {
     return newOrder.save();
   }
 
-  async findAll(): Promise<Order[]> {
+  async findAll(page: number, searchQuery: string): Promise<Order[]> {
+    const Limit = 15;
+    const Skip = (page - 1) * Limit;
+
+    if (searchQuery) {
+      const clients =
+        await this.clientService.findClientBySeachQuery(searchQuery);
+
+      if (!clients) return [];
+
+      const ordersByClient = await this.orderModel
+        .find({
+          client: { $in: clients },
+        })
+        .populate('client')
+        .populate({ path: 'cart.coupon', model: 'Coupon' })
+        .sort({ createdAt: -1 })
+        .lean()
+        .exec();
+
+      if (!ordersByClient) return [];
+
+      return ordersByClient;
+    }
+
     return await this.orderModel
       .find()
       .populate('client')
       .populate({ path: 'cart.coupon', model: 'Coupon' })
+      .sort({ createdAt: -1 })
+      .limit(Limit)
+      .skip(Skip)
       .lean()
       .exec();
   }

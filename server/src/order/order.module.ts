@@ -8,6 +8,8 @@ import { ClientModule } from 'src/client/client.module';
 import { AuthMiddleware } from 'middleware/auth.middleware';
 import { ChargilyModule } from 'src/chargily/chargily.module';
 import { ProductModule } from 'src/product/product.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from 'src/guard/role.guard';
 
 @Module({
   imports: [
@@ -16,7 +18,12 @@ import { ProductModule } from 'src/product/product.module';
     forwardRef(() => ChargilyModule),
     ProductModule,
   ],
-  providers: [OrderResolver, OrderService],
+  providers: [OrderResolver, OrderService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
   controllers: [OrderController],
   exports: [OrderService],
 })

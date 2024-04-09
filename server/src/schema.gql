@@ -85,7 +85,7 @@ type Product {
 type Query {
   categories: [Category!]!
   coupons: [Coupon!]!
-  orders: [Order!]!
+  orders(page: Float!, searchQuery: String!): [Order!]!
   product(id: String!): Product!
   products(page: String!, sortBy: String!): [Product!]!
   productsByCategories(categoryId: String!, page: String!, sortBy: String!): [Product!]!

@@ -11,6 +11,7 @@ export class AuthMiddleware implements NestMiddleware {
     try {
       const decoded = verify(token, process.env.SECRET);
 
+
       req.decodedToken = decoded;
 
       next();

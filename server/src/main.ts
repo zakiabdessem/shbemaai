@@ -15,7 +15,7 @@ async function bootstrap() {
   const options = {
     origin: [
       'http://localhost:5173',
-      '/chebaani.com$/',
+      /.*\.chebaani\.com$/, // Match origins ending with chebaani.com
       'http://localhost:3001',
       'http://localhost:3000',
     ],
@@ -24,6 +24,7 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
     credentials: true,
   };
+  
 
   app.enableCors(options);
   app.use(cookieParser());
