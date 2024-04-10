@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/table";
 import Layout from "../Layout";
 import { Checkbox } from "@/components/ui/checkbox";
-import { asset } from "@/lib/data";
 import { MAIN_DASHBOARD_URL } from "@/app/constants";
 import {
   Select,

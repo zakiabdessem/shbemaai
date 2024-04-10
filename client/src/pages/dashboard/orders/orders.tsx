@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { instance } from "@/app/axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import HorizontalCard from "@/components/HorizontalCard";
 import { Product } from "@/hooks/products/useProducts";
 import {
@@ -39,18 +39,38 @@ import {
 import { useDispatch } from "@/redux/hooks";
 import { toast } from "react-toastify";
 import { APP_SET_ERROR } from "@/redux/app/appTypes";
+import { useSearchParams } from "react-router-dom";
+import { Input } from "@/components/ui/input";
+import PaginationComponent from "@/components/Pagination";
 // TODO: Add table pagination
 
 export default function Products() {
-  // const [sortBy, setSortBy] = useState("");
-  const { orders, count, refetch } = useOrders();
+  const [searchParams] = useSearchParams();
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const { orders, count, refetch } = useOrders(searchQuery);
+
+  useEffect(() => {
+    refetch(parseInt(searchParams.get("page") ?? "1"));
+  }, [searchQuery, refetch, searchParams]);
 
   return (
     <Layout>
       <TitlePage count={count} />
       <div className="bg-white rounded-md">
+        <div className="flex items-center p-4 max-md:pt-0">
+          <Input
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-48"
+            type="search"
+            placeholder="Search"
+          />
+        </div>
         {orders && <ProductTable orders={orders} refetch={refetch} />}
       </div>
+
+      <PaginationComponent count={count} />
     </Layout>
   );
 }
@@ -60,9 +80,11 @@ function ProductTable({
   refetch,
 }: {
   orders: Order[];
-  refetch: () => void;
+  refetch: (pagination: number) => void;
 }) {
   const dispatch = useDispatch();
+  const [searchParams] = useSearchParams();
+
   const [selectedOrder, setSelectedOrder] = useState<Order>();
   const [productsData, setProductsData] = useState<Product[]>();
   const [status, setStauts] = useState("");
@@ -110,7 +132,7 @@ function ProductTable({
       type: "APP_CLEAR_LOADING",
     });
 
-    refetch();
+    refetch(parseInt(searchParams.get("page") ?? "1"));
   };
   return (
     <Table>
@@ -123,6 +145,7 @@ function ProductTable({
 
           <TableHead>OrderAt</TableHead>
           <TableHead className="w-fit">Client</TableHead>
+          <TableHead className="w-fit">Phone</TableHead>
           <TableHead className="text-left">SubPrice</TableHead>
           <TableHead className="text-left">TotalPrice</TableHead>
           <TableHead>City</TableHead>
@@ -146,13 +169,15 @@ function ProductTable({
                 <TableCell className="font-medium text-gray-400">
                   {date}
                 </TableCell>
-                <TableCell className="max-h-16 max-w-16 ">
+                <TableCell className="max-h-16 max-w-32">
                   {`${
                     capitalize(order.client.firstName) +
                     " " +
                     capitalize(order.client.lastName)
                   }`}
                 </TableCell>
+                <TableCell>{order.client.address.phone}</TableCell>
+
                 <TableCell>{order.cart.subTotal.toFixed(2)} DZD</TableCell>
                 <TableCell>{order.cart.totalPrice} DZD</TableCell>
                 <TableCell>
@@ -317,7 +342,6 @@ function ProductTable({
                                         {productsData &&
                                           selectedOrder?.cart?.products?.map(
                                             (_, index) => {
-                                              console.log(selectedOrder);
                                               const data = productsData?.find(
                                                 (p: Product) => {
                                                   return p._id == _.product;

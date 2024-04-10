@@ -14,10 +14,8 @@ import { Request, Response } from 'express';
 import { sign } from 'jsonwebtoken';
 import cookieConfig from '../config/cookie';
 import { UserService } from './user.service';
-import { OAuth2Client } from 'google-auth-library';
 import { Roles } from 'src/decorator/roles.decorator';
 import { UserRole } from 'src/decorator/role.entity';
-import { RolesGuard } from 'src/guard/role.guard';
 
 @Controller('user')
 export class UserController {
@@ -25,7 +23,6 @@ export class UserController {
 
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(RolesGuard)
   @Roles(UserRole.SUPER)
   @Post('register')
   register(@Body() createUserDto: UserCreateDto) {

@@ -67,7 +67,6 @@ const App = () => {
               path={`${MAIN_DASHBOARD_URL}/products/:id`}
               element={<EditProduct />}
             />
-            <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
             <Route
               path={`${MAIN_DASHBOARD_URL}/coupons`}
               element={<Coupons />}
@@ -88,6 +87,8 @@ const App = () => {
               }
             />
           </Route>
+
+          <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
 
           {/* Redirect/Path for handling unmatched routes */}
           {/* <Route path="*" element={<NotFound />} /> */}

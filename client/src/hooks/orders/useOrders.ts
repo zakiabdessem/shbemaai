@@ -5,8 +5,8 @@ import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const GET_DATA_ORDERS = gql`
-  query GetData {
-    orders {
+  query GetData($page: Float!, $searchQuery: String!) {
+    orders(page: $page, searchQuery: $searchQuery) {
       _id
       orderStatus
       paymentType
@@ -33,7 +33,9 @@ const GET_DATA_ORDERS = gql`
   }
 `;
 
-export const useOrders = () => {
+export const useOrders = (searchQuery: string) => {
+  const [page, setPage] = useState(1);
+
   const {
     count,
     isLoadingCount,
@@ -43,12 +45,15 @@ export const useOrders = () => {
 
   const query = GET_DATA_ORDERS;
 
+  const variables = { searchQuery, page };
+
   const {
     data: orders,
     loading: loadingOrders,
     error: errorOrders,
     refetch,
   } = useQuery(query, {
+    variables,
     fetchPolicy: "network-only",
   });
 
@@ -59,7 +64,8 @@ export const useOrders = () => {
 
   const isLoading = loadingOrders || isLoadingCount;
 
-  const refetchOrders = () => {
+  const refetchOrders = (pagination: number) => {
+    setPage(pagination);
     refetch();
     refetchCount();
   };

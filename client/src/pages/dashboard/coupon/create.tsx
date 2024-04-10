@@ -114,10 +114,10 @@ export function CreateCoupon() {
                       <Input
                         {...field}
                         id="discount"
-                        type="number" // Render input as number type
+                        type="number"
                         placeholder="Example: 5%"
-                        max={100} // Set max value for percentage
-                        min={0} // Set min value for percentage
+                        max={100}
+                        min={0}
                       />
                     </FormControl>
                   </FormItem>

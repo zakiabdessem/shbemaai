@@ -9,7 +9,7 @@ import { AuthMiddleware } from 'middleware/auth.middleware';
 import { ChargilyModule } from 'src/chargily/chargily.module';
 import { ProductModule } from 'src/product/product.module';
 import { APP_GUARD } from '@nestjs/core';
-import { RolesGuard } from 'src/guard/role.guard';
+import { GQLRolesGuard } from 'src/guard/gql-role.guard';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { RolesGuard } from 'src/guard/role.guard';
   providers: [OrderResolver, OrderService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard,
+      useClass: GQLRolesGuard,
     },
   ],
   controllers: [OrderController],
