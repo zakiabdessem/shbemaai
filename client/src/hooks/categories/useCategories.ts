@@ -11,6 +11,6 @@ const GET_DATA_CATEGORIES = gql`
 
 const useCategories = () => {
   const { data, error, loading } = useQuery(GET_DATA_CATEGORIES);
-  return { data, error, loading };
+  return { data: data?.categories, error, loading };
 };
 export default useCategories;

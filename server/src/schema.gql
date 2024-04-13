@@ -22,8 +22,9 @@ type Cart {
 
 type Category {
   _id: ID
+  createdAt: DateTime
   name: String
-  products: [Product!]!
+  products(page: Float!, searchQuery: String!): [Product!]!
 }
 
 type Client {
@@ -85,11 +86,12 @@ type Product {
 type Query {
   categories: [Category!]!
   coupons: [Coupon!]!
+  newerProducts: [Product!]!
   orders(page: Float!, searchQuery: String!): [Order!]!
   product(id: String!): Product!
-  products(page: String!, sortBy: String!): [Product!]!
-  productsByCategories(categoryId: String!, page: String!, sortBy: String!): [Product!]!
-  productsByCategory(categoryId: String!, page: String!, sortBy: String!): [Product!]!
+  products(page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
+  productsByCategories(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
+  productsByCategory(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
   relevantProducts: [Product!]!
   users: [User!]!
 }
@@ -99,6 +101,7 @@ type User {
   email: String!
   firstName: String!
   lastName: String!
+  pending: Boolean!
   role: String!
 }
 

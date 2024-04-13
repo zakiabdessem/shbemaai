@@ -4,6 +4,7 @@ import {
   IsEnum,
   IsIn,
   IsNotEmpty,
+  IsOptional,
   IsString,
   MinLength,
   Validate,
@@ -31,6 +32,7 @@ export class UserCreateDto {
   @IsNotEmpty()
   lastName: string;
 
+  @IsOptional()
   @IsEnum(UserRole, { each: true })
   role: string;
 }

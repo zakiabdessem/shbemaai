@@ -10,40 +10,37 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(createUserDto: UserCreateDto): Promise<User> {
+    return new this.userModel({
+      ...createUserDto,
+      password: await hash(createUserDto.password, 10),
+    });
+  }
+
+  async createUserPending(createUserDto: UserCreateDto): Promise<User> {
     try {
-      const newUser = new this.userModel({
+      const user = new this.userModel({
         ...createUserDto,
         password: await hash(createUserDto.password, 10),
+        role: 'business',
+        pending: true,
       });
-
-      return await newUser.save();
+      return user.save();
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }
 
   async findOne(): Promise<User> {
-    try {
-      return await this.userModel.findOne();
-    } catch (error) {
-      throw error;
-    }
+    return await this.userModel.findOne();
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    try {
-      return await this.userModel.findOne({ email });
-    } catch (error) {
-      throw error;
-    }
+    return await this.userModel.findOne({ email });
   }
 
   async findOneById(id: string): Promise<User | null> {
-    try {
-      return await this.userModel.findById(id);
-    } catch (error) {
-      throw error;
-    }
+    return await this.userModel.findById(id);
   }
 
   async loginUser(email: string, password: string): Promise<User | null> {

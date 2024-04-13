@@ -1,13 +1,12 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
-import { Product } from 'src/product/product.schema';
 
-@ObjectType('Category')
+@ObjectType('Anounce')
 @Schema({
   timestamps: true,
 })
-export class Category {
+export class Anounce {
   @Field(() => ID, { nullable: true })
   _id?: mongoose.Schema.Types.ObjectId;
 
@@ -16,11 +15,13 @@ export class Category {
     required: true,
     unique: true,
   })
-  name: string;
+  image: string;
 
-  @Field((type) => [Product])
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }] })
-  products: Product[];
+  @Field({ nullable: true })
+  @Prop({
+    required: true,
+  })
+  show: boolean;
 
   @Field({ nullable: true })
   @Prop({
@@ -28,4 +29,4 @@ export class Category {
   })
   createdAt?: Date;
 }
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const AnounceSchema = SchemaFactory.createForClass(Anounce);

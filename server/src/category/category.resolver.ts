@@ -1,4 +1,4 @@
-import { Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { Category } from './category.schema';
 import { CategoryService } from './category.service';
 import { Product } from 'src/product/product.schema';
@@ -19,7 +19,16 @@ export class CategoryResolver {
   }
 
   @ResolveField('products', () => [Product])
-  async getProducts(@Parent() category: Category) {
-    return this.productService.findAllByCategoryId(category._id.toString(), '');
+  async getProducts(
+    @Parent() category: Category,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
+  ) {
+    return this.productService.findAllByCategoryId(
+      category._id.toString(),
+      '',
+      page,
+      searchQuery,
+    );
   }
 }

@@ -62,6 +62,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { capitalize } from "lodash";
 
 function CreateProduct() {
   const dispatch = useDispatch();
@@ -134,7 +135,7 @@ function CreateProduct() {
                   All Categories
                 </label>
               </div>
-              {data?.categories.map((category: Category) => (
+              {data?.map((category: Category) => (
                 <div className="flex items-center space-x-1" key={category._id}>
                   <Checkbox
                     id={category._id}
@@ -151,7 +152,7 @@ function CreateProduct() {
                   <label
                     htmlFor={category._id}
                     className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {category.name}
+                    {capitalize(category.name)}
                   </label>
                 </div>
               ))}

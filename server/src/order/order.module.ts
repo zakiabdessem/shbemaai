@@ -16,7 +16,7 @@ import { GQLRolesGuard } from 'src/guard/gql-role.guard';
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     ClientModule,
     forwardRef(() => ChargilyModule),
-    ProductModule,
+    forwardRef(() => ProductModule),
   ],
   providers: [OrderResolver, OrderService,
     {

@@ -37,6 +37,10 @@ export class CategoryService {
     return await this.categoryModel.find({ _id: { $in: categories } }).exec();
   }
 
+  async findOneAndDelete(id: string) {
+    return await this.categoryModel.findByIdAndDelete(id);
+  }
+
   async PushProduct(
     id: Types.ObjectId | string,
     productId: Types.ObjectId | string,
@@ -61,5 +65,16 @@ export class CategoryService {
 
   async findOne(id: string): Promise<Category> {
     return await this.categoryModel.findById(id).exec();
+  }
+
+  async update(id: string, name: string) {
+    return await this.categoryModel.updateOne(
+      {
+        _id: id.toString(),
+      },
+      {
+        name,
+      },
+    );
   }
 }

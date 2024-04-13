@@ -19,6 +19,7 @@ import { Product } from './product.schema';
 import { Model } from 'mongoose';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import * as _ from 'lodash';
+import { OrderService } from 'src/order/order.service';
 
 @Controller('product')
 export class ProductController {
@@ -27,6 +28,7 @@ export class ProductController {
     private readonly prodcutService: ProductService,
     private readonly categoryService: CategoryService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly orderService: OrderService,
   ) {}
 
   @Post('create')
@@ -187,6 +189,35 @@ export class ProductController {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error',
       });
+    }
+  }
+
+  @Post('delete')
+  async delete(@Body() { id }: { id: string }, @Res() res: Response) {
+    try {
+      const product = await this.prodcutService.findOne(id);
+
+      if (!product)
+        return res.status(HttpStatus.NOT_FOUND).json({
+          message: 'No product found',
+        });
+
+      const order = await this.orderService.findOneWithProduct(id);
+
+      if (order) {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          message: 'Orders found containing the specified product.',
+        });
+      }
+
+      await this.prodcutService.delete(id);
+
+      return res.status(HttpStatus.OK).json({ message: 'Success' });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: error.message });
     }
   }
 }

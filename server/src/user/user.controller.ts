@@ -29,6 +29,27 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
+  @Post('whitelist')
+  async registerPendings(
+    @Body() createUserDto: UserCreateDto,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.userService.createUserPending(createUserDto);
+
+      return res.status(HttpStatus.OK).json({
+        message:
+          'Vous avez enregistré avec succès, attendez que nous vous contacter.',
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: 'Authentication failed',
+      });
+    }
+  }
+
   @Post('login')
   async login(
     @Body() { email, password }: { email: string; password: string },
@@ -110,5 +131,5 @@ export class UserController {
   //       message: 'Authentication failed',
   //     });
   //   }
-  // } 
+  // }
 }

@@ -26,10 +26,12 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal, PlusIcon } from "lucide-react";
 import PaginationComponent from "@/components/Pagination";
 import { useSearchParams } from "react-router-dom";
+import { capitalize } from "lodash";
 
 // TODO: Add table pagination
 
 export default function Products() {
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [sortBy, setSortBy] = useState("");
 
@@ -38,6 +40,7 @@ export default function Products() {
   const { products, categories, count, refetch } = useProducts({
     sortBy,
     selectedCategoryId,
+    searchQuery,
   });
 
   const handleReset = () => {
@@ -52,7 +55,7 @@ export default function Products() {
 
   useEffect(() => {
     refetch(parseInt(searchParams.get("page") ?? "1"));
-  }, [selectedCategoryId, sortBy, refetch, searchParams]);
+  }, [selectedCategoryId, sortBy, refetch, searchParams, searchQuery]);
 
   const [selectedAll, setSelectedAll] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -123,7 +126,7 @@ export default function Products() {
                       categories.length > 0 &&
                       categories.map((category: Category) => (
                         <SelectItem key={category._id} value={category._id}>
-                          {category.name}
+                          {capitalize(category.name)}
                         </SelectItem>
                       ))}
                   </SelectGroup>
@@ -152,7 +155,12 @@ export default function Products() {
           </div>
 
           <div className="flex items-center p-4 max-md:pt-0">
-            <Input className="max-w-48" type="search" placeholder="Search" />
+            <Input
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-48"
+              type="search"
+              placeholder="Search"
+            />
           </div>
         </div>
         {products && (
@@ -192,6 +200,7 @@ function ProductTable({
           <TableHead>SKU</TableHead>
           <TableHead className="text-left">Price</TableHead>
           <TableHead>Inventory</TableHead>
+          <TableHead>Show</TableHead>
           <TableHead className="text-right"></TableHead>
         </TableRow>
       </TableHeader>
@@ -215,7 +224,9 @@ function ProductTable({
                   />
                 </TableCell>
                 <TableCell className="w-60">{product.name}</TableCell>
-                <TableCell>{product.categories[0]?.name || "-"}</TableCell>
+                <TableCell className="font-medium text-gray-500">
+                  {capitalize(product.categories[0]?.name) || "-"}
+                </TableCell>
                 <TableCell className="font-medium text-gray-400">
                   {product.sku}
                 </TableCell>
@@ -228,6 +239,9 @@ function ProductTable({
                     : product.inStock
                     ? "In Stock"
                     : "Out of Stock"}
+                </TableCell>
+                <TableCell className="font-medium text-gray-400">
+                  {product.show ? "Available" : "Hidden"}
                 </TableCell>
                 <TableCell className="text-right">
                   <a href={`${MAIN_DASHBOARD_URL}/products/${product._id}`}>

@@ -21,31 +21,50 @@ export class ProductResolver {
   async productsByCategory(
     @Args('categoryId') categoryId: string,
     @Args('sortBy') sortBy: string,
-    @Args('page') page: string,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
   ): Promise<Product[]> {
-    return await this.productService.findAllByCategoryId(categoryId, sortBy);
+    return await this.productService.findAllByCategoryId(
+      categoryId,
+      sortBy,
+      page,
+      searchQuery,
+    );
   }
 
   @Query(() => [Product])
   async productsByCategories(
     @Args('categoryId') categoryId: string,
     @Args('sortBy') sortBy: string,
-    @Args('page') page: string,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
   ): Promise<Product[]> {
-    return await this.productService.findAllByCategoriesId(categoryId, sortBy);
+    return await this.productService.findAllByCategoriesId(
+      categoryId,
+      sortBy,
+      page,
+      searchQuery,
+    );
   }
 
   @Query(() => [Product])
   async products(
     @Args('sortBy') sortBy: string,
-    @Args('page') page: string,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
   ): Promise<Product[]> {
-    return this.productService.findAll(sortBy, parseInt(page));
+    return this.productService.findAll(sortBy, page, searchQuery);
   }
 
   @Query(() => [Product])
   async relevantProducts(): Promise<Product[]> {
     return this.productService.findRelevant();
+  }
+
+  //newerProducts
+  @Query(() => [Product])
+  async newerProducts(): Promise<Product[]> {
+    return this.productService.findNewer();
   }
 
   @ResolveField('categories', () => [Category])

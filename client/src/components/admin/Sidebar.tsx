@@ -26,6 +26,12 @@ export default function Sidebar() {
       src: asset("sidebar/products.svg"),
     },
     {
+      title: "Categories",
+      href: MAIN_DASHBOARD_URL + "/categories",
+      src: asset("sidebar/products.svg"),
+      disabled: false,
+    },
+    {
       title: "Orders",
       href: MAIN_DASHBOARD_URL + "/orders",
       src: asset("sidebar/orders.svg"),

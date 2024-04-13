@@ -9,7 +9,7 @@ import { OrderModule } from 'src/order/order.module';
   providers: [ChargilyService],
   controllers: [ChargilyController],
   imports: [
-    ProductModule,
+    forwardRef(() => ProductModule),
     forwardRef(() => OrderModule),
     ConfigModule.forRoot(),
   ],

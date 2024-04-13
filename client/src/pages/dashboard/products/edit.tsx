@@ -56,6 +56,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { capitalize } from "lodash";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { instance } from "@/app/axios";
 
 function EditProduct() {
   const dispatch = useDispatch();
@@ -88,7 +101,7 @@ function EditProduct() {
   }, [id, dataProduct]);
 
   useEffect(() => {
-    if (dataCategory?.categories) {
+    if (dataCategory) {
       const categoriesSelected = dataProduct?.categories.map(
         (c: Category) => c._id
       );
@@ -161,9 +174,9 @@ function EditProduct() {
                 </label>
               </div>
               {dataCategory &&
-                dataCategory.categories.length > 0 &&
+                dataCategory.length > 0 &&
                 categories &&
-                dataCategory?.categories.map((category: Category) => (
+                dataCategory?.map((category: Category) => (
                   <div
                     className="flex items-center space-x-1"
                     key={category._id}>
@@ -186,7 +199,7 @@ function EditProduct() {
                     <label
                       htmlFor={category._id}
                       className="cursor-pointer text-sm font-medium leading-none">
-                      {category.name}
+                      {capitalize(category.name)}
                     </label>
                   </div>
                 ))}
@@ -224,6 +237,8 @@ export function InputForm({
   setProduct?: (product: Product) => void;
   providedOptions?: Option[];
 }) {
+  const navigate = useNavigate();
+
   const editProductMutation = useEditProduct();
 
   const [selectedImage, setSelectedImage] = useState<File | string | null>(
@@ -324,7 +339,6 @@ export function InputForm({
     // Handle the main image and option images uploading
     handleImageUpload(data)
       .then(() => {
-        console.log("Submission data ready:", data);
         return editProductMutation.mutateAsync(data);
       })
       .catch((error) => console.error("Error processing images:", error));
@@ -388,6 +402,39 @@ export function InputForm({
       });
     };
   }, [options, providedOptions]);
+
+  const handleDeleteProduct = async () => {
+    await instance
+      .post("product/delete", {
+        id: product?._id.toString(),
+      })
+      .then(() => {
+        toast.success(
+          `Product have order cannot be deleted just unshow it from Sotre`,
+          {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+          }
+        );
+      })
+      .then(() => navigate(`${MAIN_DASHBOARD_URL}/products`))
+      .catch((error) =>
+        toast.error(`Error ${error.response.data.message}`, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        })
+      );
+  };
 
   return (
     <Form {...form}>
@@ -634,7 +681,7 @@ export function InputForm({
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={"max-w-screen-md overflow-y-scroll max-h-screen"}>
+                className={"max-w-screen-lg overflow-y-scroll max-h-screen"}>
                 <DialogHeader>
                   <DialogTitle>Add product option</DialogTitle>
                   <DialogDescription>
@@ -876,6 +923,29 @@ export function InputForm({
           <Button className="my-5" type="submit" size="lg" color="primary">
             Edit Product
           </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="my-5 mx-1" size="lg">
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => handleDeleteProduct()}>
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </form>
       </div>
     </Form>

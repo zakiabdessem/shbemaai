@@ -70,8 +70,10 @@ export class CartController {
       if (!addCouponDto.code || addCouponDto.code === '')
         throw new Error('Le code promo est requis');
 
-      const coupon = await this.couponService.findOne(addCouponDto.code);
-      if (!coupon || !coupon.isActive)
+      const coupon = await this.couponService.findOne(
+        addCouponDto.code,
+      );
+      if (!coupon)
         throw new Error('Coupon introuvable ou pas actif');
 
       if (session.cart?.coupon == coupon._id) {
@@ -118,6 +120,10 @@ export class CartController {
       const product = await this.productService.findOne(addCartDto.product);
       if (!product) {
         throw new Error('Product not found');
+      }
+
+      if (!product.show) {
+        throw new Error('Product not for sale');
       }
 
       // Initial check for product option validity

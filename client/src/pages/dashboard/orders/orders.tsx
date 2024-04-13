@@ -351,10 +351,10 @@ function ProductTable({
                                               return (
                                                 <>
                                                   {data && (
-                                                    <div key={index}>
+                                                    <div key={`main-${index}`}>
                                                       {_.quantity > 0 && (
                                                         <HorizontalCard
-                                                          key={index.toString()}
+                                                          key={`index.toString()`}
                                                           title={data.name}
                                                           price={data.price}
                                                           image={

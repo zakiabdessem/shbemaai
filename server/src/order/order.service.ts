@@ -74,6 +74,12 @@ export class OrderService {
     return await this.orderModel.findById(id).populate('client').exec();
   }
 
+  async findOneWithProduct(selectedProductId) {
+    return await this.orderModel.findOne({
+      'cart.products.product': selectedProductId,
+    });
+  }
+
   async pushCheckoutId(id: string, checkoutId): Promise<Order> {
     return await this.orderModel
       .findByIdAndUpdate(id, {

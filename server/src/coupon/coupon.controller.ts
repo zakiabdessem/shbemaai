@@ -18,9 +18,7 @@ import { Request, Response } from 'express';
 
 @Controller('coupon')
 export class CouponController {
-  constructor(
-    private readonly couponService: CouponService,
-  ) {}
+  constructor(private readonly couponService: CouponService) {}
 
   @Post('create')
   @Roles(UserRole.ADMIN)
@@ -42,20 +40,21 @@ export class CouponController {
     }
   }
 
-  @Delete()
+  @Post('delete')
   @Roles(UserRole.ADMIN)
-  async delete(@Body() code: string, @Res() res: Response) {
+  async delete(@Body() { code }: { code: string }, @Res() res: Response) {
     try {
+
       const coupon = await this.couponService.findOne(code);
 
       if (!coupon) return;
-
 
       await this.couponService.findOneAndDelete(code);
       return res.status(HttpStatus.ACCEPTED).json({
         message: 'Coupon Deleted successfully',
       });
     } catch (error) {
+      console.log(error);
       return res
         .status(HttpStatus.BAD_REQUEST)
         .json({ message: error.message });

@@ -24,6 +24,7 @@ export interface Product {
   weight: number;
   options: Option[];
   track: boolean;
+  show: boolean;
 }
 
 export interface Category {
@@ -32,8 +33,8 @@ export interface Category {
 }
 
 const GET_DATA_PRODUCTS = gql`
-  query GetData($sortBy: String!, $page: String!) {
-    products(sortBy: $sortBy, page: $page) {
+  query GetData($sortBy: String!, $page: Float!, $searchQuery: String!) {
+    products(sortBy: $sortBy, page: $page, searchQuery: $searchQuery) {
       _id
       description
       name
@@ -42,6 +43,7 @@ const GET_DATA_PRODUCTS = gql`
         name
       }
       sku
+      show
       price
       quantity
       inStock
@@ -54,12 +56,14 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
   query GetData(
     $selectedCategoryId: String!
     $sortBy: String!
-    $page: String!
+    $page: Float!
+    $searchQuery: String!
   ) {
     productsByCategory(
       categoryId: $selectedCategoryId
       sortBy: $sortBy
       page: $page
+      searchQuery: $searchQuery
     ) {
       _id
       description
@@ -69,6 +73,7 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
         name
       }
       sku
+      show
       price
       quantity
       inStock
@@ -143,9 +148,11 @@ const getSortValue = (sortBy: string) => {
 const useProducts = ({
   sortBy,
   selectedCategoryId,
+  searchQuery,
 }: {
   sortBy: string;
   selectedCategoryId: string;
+  searchQuery: string;
 }) => {
   const { count, isLoadingCount, error: errorCount } = useCount("");
 
@@ -159,8 +166,9 @@ const useProducts = ({
 
   const variables = {
     sortBy: getSortValue(sortBy),
-    page: page.toString(),
+    page,
     ...(isCategorySort && { selectedCategoryId }),
+    searchQuery,
   };
 
   const {
@@ -194,7 +202,7 @@ const useProducts = ({
   return {
     refetch: refetchProducts,
     products: products?.products || products?.productsByCategory,
-    categories: categories?.categories,
+    categories,
     count,
     isLoading,
   };

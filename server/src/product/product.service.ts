@@ -41,9 +41,31 @@ export class ProductService {
     ).exec();
   }
 
-  async findAll(sortBy: string, page: number): Promise<Product[]> {
+  async findAll(
+    sortBy: string,
+    page: number,
+    searchQuery: string,
+  ): Promise<Product[]> {
     const Limit = 15;
     const Skip = (page - 1) * Limit;
+
+    if (searchQuery) {
+      const queryConditions: any = {};
+
+      const regex = new RegExp(searchQuery, 'i');
+      queryConditions.$or = [
+        { name: { $regex: regex } },
+        { description: { $regex: regex } },
+      ];
+
+      return await this.productModel
+        .find(queryConditions)
+        .limit(Limit)
+        .skip(Skip)
+        .sort({ createdAt: -1 })
+        .exec();
+    }
+
     if (!sortBy)
       return await this.productModel.find().limit(Limit).skip(Skip).exec();
     if (sortBy == 'stock')
@@ -79,8 +101,23 @@ export class ProductService {
     return await this.productModel
       .find({
         $or: [
-          { track: true, quantity: { $gt: 0 } },
-          { track: false, inStock: true },
+          { track: true, quantity: { $gt: 0 }, promote: false },
+          { track: false, inStock: true, promote: false },
+        ],
+      })
+      .limit(8)
+      .sort({
+        createdAt: 1,
+      })
+      .exec();
+  }
+
+  async findNewer() {
+    return await this.productModel
+      .find({
+        $or: [
+          { track: true, quantity: { $gt: 0 }, promote: true },
+          { track: false, inStock: true, promote: true },
         ],
       })
       .limit(4)
@@ -97,9 +134,35 @@ export class ProductService {
   async findAllByCategoryId(
     categoryId: string,
     sortBy: string,
+    page: number,
+    searchQuery: string,
   ): Promise<Product[]> {
+    const Limit = 15;
+    const Skip = (page - 1) * Limit;
     // Check if valid mongoID
     if (!mongoose.Types.ObjectId.isValid(categoryId)) return [];
+
+    if (searchQuery) {
+      const queryConditions: any = {};
+
+      const regex = new RegExp(searchQuery, 'i');
+      queryConditions.$or = [
+        { name: { $regex: regex } },
+        { description: { $regex: regex } },
+      ];
+
+      if (categoryId) {
+        queryConditions.$and = queryConditions.$and || [];
+        queryConditions.$and.push({ categories: categoryId });
+      }
+
+      return await this.productModel
+        .find(queryConditions)
+        .limit(Limit)
+        .skip(Skip)
+        .sort({ createdAt: -1 })
+        .exec();
+    }
 
     const query = { categories: categoryId };
     let sortQuery = {};
@@ -116,18 +179,45 @@ export class ProductService {
     }
 
     // Execute query
-    return await this.productModel.find(query).sort(sortQuery).exec();
+    return await this.productModel
+      .find(query)
+      .sort(sortQuery)
+      .limit(Limit)
+      .skip(Skip)
+      .exec();
   }
 
   async findAllByCategoriesId(
     categoryId: string,
     sortBy: string,
+    page: number,
+    searchQuery: string,
   ): Promise<Product[]> {
+    const Limit = 15;
+    const Skip = (page - 1) * Limit;
+
     let query =
       categoryId !== 'all'
         ? { categories: { $in: categoryId.split(',') } }
         : {};
     let sortQuery = {};
+
+    if (searchQuery) {
+      const queryConditions: any = {};
+
+      const regex = new RegExp(searchQuery, 'i');
+      queryConditions.$or = [
+        { name: { $regex: regex } },
+        { description: { $regex: regex } },
+      ];
+
+      return await this.productModel
+        .find(queryConditions)
+        .sort({ createdAt: -1 })
+        .limit(Limit)
+        .skip(Skip)
+        .exec();
+    }
 
     // Define sort options
     if (sortBy === 'stock') {
@@ -141,7 +231,22 @@ export class ProductService {
     }
 
     // Execute query
-    return await this.productModel.find(query).sort(sortQuery).exec();
+    return await this.productModel
+      .find(query)
+      .sort(sortQuery)
+      .limit(Limit)
+      .skip(Skip)
+      .exec();
+  }
+
+  async findOneByCategoryId(id: string) {
+    return await this.productModel.findOne({
+      categories: id,
+    });
+  }
+
+  async delete(id: string) {
+    return await this.productModel.findByIdAndDelete(id);
   }
 
   async countDocument(selectedCategoryId: string, sortBy: string) {

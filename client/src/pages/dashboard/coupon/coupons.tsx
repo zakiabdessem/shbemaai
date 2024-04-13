@@ -16,6 +16,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import moment from "moment";
 import { DeleteIcon, PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { instance } from "@/app/axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 // TODO: Add table pagination
 
 export default function Coupons() {
@@ -41,7 +44,28 @@ export default function Coupons() {
 }
 
 function ProductTable({ coupons }: { coupons: Coupon[] }) {
-  console.log(coupons);
+  const navigate = useNavigate();
+  const handleDeleteCoupon = async (id: string) => {
+    await instance
+      .post("coupon/delete", {
+        code: id,
+      })
+      .then(() => {
+        toast.success(`Code promo is deleted`, {
+          position: "bottom-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
+
+        setTimeout(() => {
+          navigate(`${MAIN_DASHBOARD_URL}/coupons`);
+        }, 3000);
+      });
+  };
   return (
     <Table>
       <TableCaption className="p-2">
@@ -94,7 +118,9 @@ function ProductTable({ coupons }: { coupons: Coupon[] }) {
                   {
                     // Todo : Add model for coupon
                   }
-                  <Button variant="destructive">
+                  <Button
+                    onClick={() => handleDeleteCoupon(coupon.code)}
+                    variant="destructive">
                     <DeleteIcon />
                   </Button>
                 </TableCell>

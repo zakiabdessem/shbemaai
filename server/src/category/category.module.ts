@@ -4,7 +4,6 @@ import { CategoryController } from './category.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Category, CategorySchema } from './category.schema';
 import { CategoryResolver } from './category.resolver';
-import { ProductService } from 'src/product/product.service';
 import { ProductModule } from 'src/product/product.module';
 
 @Module({

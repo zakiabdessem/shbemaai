@@ -26,6 +26,12 @@ export class User {
   @Field()
   @Prop({ type: String, enum: UserRole })
   role: UserRole;
+
+  @Field()
+  @Prop({
+    default: true,
+  })
+  pending: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

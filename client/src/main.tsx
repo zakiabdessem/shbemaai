@@ -28,6 +28,7 @@ import ProtectedRoutes from "./ProtectedRoutes";
 import Orders from "./pages/dashboard/orders/orders";
 import { MoonLoader } from "react-spinners";
 import { CreateCoupon } from "./pages/dashboard/coupon/create";
+import Categories from "./pages/dashboard/categories/categories";
 
 const LoginPage = lazy(() => import("./pages/auth/admin/loginPage"));
 const Dashboard = lazy(() => import("./pages/dashboard/dashboard"));
@@ -75,6 +76,11 @@ const App = () => {
               path={`${MAIN_DASHBOARD_URL}/coupons/create`}
               element={<CreateCoupon />}
             />
+            <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
+            <Route
+              path={`${MAIN_DASHBOARD_URL}/categories`}
+              element={<Categories />}
+            />
 
             <Route
               path="*"
@@ -87,8 +93,6 @@ const App = () => {
               }
             />
           </Route>
-
-          <Route path={`${MAIN_DASHBOARD_URL}/orders`} element={<Orders />} />
 
           {/* Redirect/Path for handling unmatched routes */}
           {/* <Route path="*" element={<NotFound />} /> */}
