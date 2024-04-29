@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "../Layout";
 import { useDispatch } from "@/redux/hooks";
 import useCategories from "@/hooks/categories/useCategories";
@@ -43,7 +43,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CircleX, InfoIcon, PlusIcon } from "lucide-react";
+import { CircleX, InfoIcon, Plus, PlusIcon, Trash } from "lucide-react";
 import { Product, useProduct } from "@/hooks/products/useProducts";
 import { useNavigate, useParams } from "react-router-dom";
 import { MAIN_DASHBOARD_URL } from "@/app/constants";
@@ -275,10 +275,16 @@ export function InputForm({
     defaultValues: {
       name: "",
       description: "",
-      image: null,
+      ruban: "",
+      image: null || "",
       price: 0,
-      business: 0,
-      unit: 10,
+      business: [
+        {
+          price: 0,
+          unit: 0,
+          name: "",
+        },
+      ],
       weight: 0,
       sku: "",
       quantity: 0,
@@ -436,6 +442,24 @@ export function InputForm({
       );
   };
 
+  const handleAddCollisage = () => {
+    form.setValue("business", [
+      ...form.watch("business"),
+      {
+        price: 0,
+        unit: 0,
+        name: "",
+      },
+    ]);
+  };
+
+  const handleRemoveCollisage = (item: number) => {
+    form.setValue(
+      "business",
+      form.watch("business").filter((_, index) => index !== item)
+    );
+  };
+
   return (
     <Form {...form}>
       <div className="flex flex-col w-full">
@@ -495,51 +519,79 @@ export function InputForm({
                 />
               </div>
 
-              {/* Image */}
-              <div className="p-2">
+              <div className="p-2 max-w-32">
                 <FormField
                   control={form.control}
-                  name="image"
+                  name="ruban"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col max-w-64">
-                      <FormLabel>Image*</FormLabel>
+                    <FormItem>
+                      <FormLabel>Ruban</FormLabel>
                       <FormControl>
-                        <Button size="lg" type="button">
-                          <input
-                            type="file"
-                            className="hidden"
-                            id="fileInput"
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            onChange={(e) => {
-                              field.onChange(e.target.files);
-                              setSelectedImage(e.target.files?.[0] || null);
-                            }}
-                            ref={field.ref}
-                          />
-
-                          <label
-                            htmlFor="fileInput"
-                            className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
-                            <span className="whitespace-nowrap">
-                              {selectedImage instanceof File
-                                ? selectedImage.name
-                                : "choose your image"}
-                            </span>
-                          </label>
-                        </Button>
+                        <Input placeholder="Ruban" maxLength={70} {...field} />
                       </FormControl>
-                      <FormDescription>
-                        2mb max, PNG, JPG, JPEG, WEBP
-                      </FormDescription>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="flex max-md:flex-col gap-3">
+              {/* Image */}
+              <div className="p-2">
+                <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                    <div className="flex items-center gap-2">
+                      <FormItem className="flex flex-col max-w-64">
+                        <FormLabel>Image*</FormLabel>
+                        <FormControl>
+                          <Button size="lg" type="button">
+                            <input
+                              type="file"
+                              className="hidden"
+                              id="fileInput"
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onChange={(e) => {
+                                field.onChange(e.target.files);
+                                setSelectedImage(e.target.files?.[0] || null);
+                              }}
+                              ref={field.ref}
+                            />
+
+                            <label
+                              htmlFor="fileInput"
+                              className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                              <span className="whitespace-nowrap">
+                                {selectedImage instanceof File
+                                  ? selectedImage.name
+                                  : "choose your image"}
+                              </span>
+                            </label>
+                          </Button>
+                        </FormControl>
+                        <FormDescription>
+                          2mb max, PNG, JPG, JPEG, WEBP
+                        </FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+
+                      <FormItem className="flex flex-col max-w-64">
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="https://example.com/"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  )}
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
                 {/* Price */}
                 <div className="p-2">
                   <FormField
@@ -559,70 +611,111 @@ export function InputForm({
                   />
                 </div>
 
-                <div className="flex items-center gap-1 p-2">
-                  {/* Business */}
-                  <FormField
-                    control={form.control}
-                    name="business"
-                    render={({ field }) => (
-                      <FormItem className="max-w-20">
-                        <FormLabel>Business</FormLabel>
-                        <Popover>
-                          <PopoverTrigger>
-                            <InfoIcon
-                              className="cursor-pointer relative bottom-1 left-[2px]"
-                              width={10}
-                              height={10}
-                            />
-                          </PopoverTrigger>
-                          <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
-                            <div className="text-gray-700">
-                              Example
-                              <p>
-                                Price:{" "}
-                                <span className="font-semibold">1000 DA</span>
-                              </p>
-                              <p>
-                                Quantity:{" "}
-                                <span className="font-semibold">20 pieces</span>
-                              </p>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="0"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
+                <div className="flex flex-col gap-1 p-2">
+                  {form.watch("business").map((item, index) => (
+                    <React.Fragment key={index}>
+                      <div className="flex gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`business.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="max-w-32">
+                              <FormLabel>Colisage</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  placeholder="Colisage"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`business.${index}.price`}
+                          render={({ field }) => (
+                            <FormItem className="max-w-20">
+                              <FormLabel>Business</FormLabel>
+                              <Popover>
+                                <PopoverTrigger>
+                                  <InfoIcon
+                                    className="cursor-pointer relative bottom-1 left-[2px]"
+                                    width={10}
+                                    height={10}
+                                  />
+                                </PopoverTrigger>
+                                <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
+                                  <div className="text-gray-700">
+                                    Example
+                                    <p>
+                                      Price:{" "}
+                                      <span className="font-semibold">
+                                        1000 DA
+                                      </span>
+                                    </p>
+                                    <p>
+                                      Quantity:{" "}
+                                      <span className="font-semibold">
+                                        20 pieces
+                                      </span>
+                                    </p>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>DA</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        /
+                        <div className="flex justify-center items-center">
+                          <FormField
+                            control={form.control}
+                            name={`business.${index}.unit`}
+                            render={({ field }) => (
+                              <FormItem className="max-w-[73px]">
+                                <FormLabel>Piece</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="10"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormDescription>Unit</FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
                           />
-                        </FormControl>
-                        <FormDescription>DA</FormDescription>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  /
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem className="max-w-[73px]">
-                        <FormLabel>Piece</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="10" {...field} />
-                        </FormControl>
-                        <FormDescription>Unit</FormDescription>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="bg-red-500 ml-2"
+                            onClick={() => handleRemoveCollisage(index)}>
+                            <Trash className="text-white font-light w-8" />
+                          </Button>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                className="bg-green-500 my-5 mb-2"
+                onClick={handleAddCollisage}>
+                <Plus className="text-white font-light w-16" />
+              </Button>
 
               <div className="flex max-md:flex-col gap-2 p-2">
                 {/* Weight */}

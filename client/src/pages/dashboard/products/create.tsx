@@ -19,8 +19,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useEffect, useState } from "react";
-import { PlusIcon, InfoIcon, CircleX } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { PlusIcon, InfoIcon, CircleX, Plus, Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -63,6 +63,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { capitalize } from "lodash";
+import { isValidURL } from "@/validator/url";
 
 function CreateProduct() {
   const dispatch = useDispatch();
@@ -216,12 +217,19 @@ export function InputForm({
       description: "",
       image: "",
       price: 0,
+      ruban: "",
       unit: 10,
       weight: 0,
       sku: "",
       quantity: 0,
       inStock: false,
-      business: 0,
+      business: [
+        {
+          price: 0,
+          unit: 0,
+          name: "",
+        },
+      ],
     },
   });
 
@@ -291,13 +299,17 @@ export function InputForm({
     }
 
     // Process the main image
+
     const processMainImage = new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        data.image = event?.target?.result;
-        resolve(true); // Resolve after setting main image
-      };
-      reader.readAsDataURL(data.image[0]);
+      if (!isValidURL(form.watch("image"))) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          data.image = event?.target?.result;
+          resolve(true); // Resolve after setting main image
+        };
+        reader.readAsDataURL(data.image[0]);
+      }
+      resolve(true);
     });
 
     const optionImagePromises = data.options.map((option: any) => {
@@ -337,6 +349,24 @@ export function InputForm({
       });
     };
   }, [options]);
+
+  const handleAddCollisage = () => {
+    form.setValue("business", [
+      ...form.watch("business"),
+      {
+        price: 0,
+        unit: 0,
+        name: "",
+      },
+    ]);
+  };
+
+  const handleRemoveCollisage = (item: number) => {
+    form.setValue(
+      "business",
+      form.watch("business").filter((_, index) => index !== item)
+    );
+  };
 
   return (
     <Form {...form}>
@@ -403,45 +433,78 @@ export function InputForm({
                   control={form.control}
                   name="image"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col max-w-64">
-                      <FormLabel>Image*</FormLabel>
-                      <FormControl>
-                        <Button size="lg" type="button">
-                          <input
-                            type="file"
-                            className="hidden"
-                            id="fileInput"
-                            onBlur={field.onBlur}
-                            name={field.name}
-                            onChange={(e) => {
-                              field.onChange(e.target.files);
-                              setSelectedImage(e.target.files?.[0] || null);
-                            }}
-                            ref={field.ref}
+                    <div className="flex items-center gap-2">
+                      <FormItem className="flex flex-col max-w-64">
+                        <FormLabel>Image*</FormLabel>
+                        <FormControl>
+                          <Button size="lg" type="button">
+                            <input
+                              type="file"
+                              className="hidden"
+                              id="fileInput"
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onChange={(e) => {
+                                field.onChange(e.target.files);
+                                setSelectedImage(e.target.files?.[0] || null);
+                              }}
+                              ref={field.ref}
+                            />
+
+                            <label
+                              htmlFor="fileInput"
+                              className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
+                              <span className="whitespace-nowrap">
+                                {selectedImage?.name &&
+                                !isValidURL(form.watch("image"))
+                                  ? selectedImage?.name
+                                  : "choose your image"}
+                              </span>
+                            </label>
+                          </Button>
+                        </FormControl>
+                        <FormDescription>
+                          2mb max, PNG, JPG, JPEG, WEBP
+                        </FormDescription>
+
+                        <FormMessage />
+                      </FormItem>
+
+                      <FormItem className="flex flex-col max-w-64">
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="https://example.com/"
+                            {...field}
                           />
+                        </FormControl>
+                      </FormItem>
+                    </div>
+                  )}
+                />
+              </div>
 
-                          <label
-                            htmlFor="fileInput"
-                            className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
-                            <span className="whitespace-nowrap">
-                              {selectedImage?.name
-                                ? selectedImage?.name
-                                : "choose your image"}
-                            </span>
-                          </label>
-                        </Button>
+              <div className="p-2 max-w-32">
+                <FormField
+                  control={form.control}
+                  name="ruban"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Ruban</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Ruban"
+                          maxLength={70}
+                          {...field}
+                        />
                       </FormControl>
-                      <FormDescription>
-                        2mb max, PNG, JPG, JPEG, WEBP
-                      </FormDescription>
-
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
 
-              <div className="flex max-md:flex-col gap-3">
+              <div className="flex flex-col max-md:flex-col gap-3">
                 {/* Price */}
                 <div className="p-2">
                   <FormField
@@ -461,63 +524,111 @@ export function InputForm({
                   />
                 </div>
 
-                <div className="flex items-center gap-1 p-2">
-                  {/* Business */}
-                  <FormField
-                    control={form.control}
-                    name="business"
-                    render={({ field }) => (
-                      <FormItem className="max-w-20">
-                        <FormLabel>Business</FormLabel>
-                        <Popover>
-                          <PopoverTrigger>
-                            <InfoIcon
-                              className="cursor-pointer relative bottom-1 left-[2px]"
-                              width={10}
-                              height={10}
-                            />
-                          </PopoverTrigger>
-                          <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
-                            <div className="text-gray-700">
-                              Example
-                              <p>
-                                Price:{" "}
-                                <span className="font-semibold">1000 DA</span>
-                              </p>
-                              <p>
-                                Quantity:{" "}
-                                <span className="font-semibold">20 pieces</span>
-                              </p>
-                            </div>
-                          </PopoverContent>
-                        </Popover>
-                        <FormControl>
-                          <Input type="number" placeholder="0" {...field} />
-                        </FormControl>
-                        <FormDescription>DA</FormDescription>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  /
-                  <FormField
-                    control={form.control}
-                    name="unit"
-                    render={({ field }) => (
-                      <FormItem className="max-w-[73px]">
-                        <FormLabel>Piece</FormLabel>
-                        <FormControl>
-                          <Input type="number" placeholder="10" {...field} />
-                        </FormControl>
-                        <FormDescription>Unit</FormDescription>
-
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                <div className="flex flex-col gap-1 p-2">
+                  {form.watch("business").map((item, index) => (
+                    <React.Fragment key={index}>
+                      <div className="flex gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`business.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="max-w-32">
+                              <FormLabel>Colisage</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="text"
+                                  placeholder="Colisage"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`business.${index}.price`}
+                          render={({ field }) => (
+                            <FormItem className="max-w-20">
+                              <FormLabel>Business</FormLabel>
+                              <Popover>
+                                <PopoverTrigger>
+                                  <InfoIcon
+                                    className="cursor-pointer relative bottom-1 left-[2px]"
+                                    width={10}
+                                    height={10}
+                                  />
+                                </PopoverTrigger>
+                                <PopoverContent className="text-sm bg-white shadow-lg border border-gray-200 rounded-lg p-4 max-w-44">
+                                  <div className="text-gray-700">
+                                    Example
+                                    <p>
+                                      Price:{" "}
+                                      <span className="font-semibold">
+                                        1000 DA
+                                      </span>
+                                    </p>
+                                    <p>
+                                      Quantity:{" "}
+                                      <span className="font-semibold">
+                                        20 pieces
+                                      </span>
+                                    </p>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>DA</FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        /
+                        <div className="flex justify-center items-center">
+                          <FormField
+                            control={form.control}
+                            name={`business.${index}.unit`}
+                            render={({ field }) => (
+                              <FormItem className="max-w-[73px]">
+                                <FormLabel>Piece</FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="10"
+                                    {...field}
+                                  />
+                                </FormControl>
+                                <FormDescription>Unit</FormDescription>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="bg-red-500 ml-2"
+                            onClick={() => handleRemoveCollisage(index)}>
+                            <Trash className="text-white font-light w-8" />
+                          </Button>
+                        </div>
+                      </div>
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                className="bg-green-500 my-5 mb-2"
+                onClick={handleAddCollisage}>
+                <Plus className="text-white font-light w-16" />
+              </Button>
 
               <div className="flex max-md:flex-col gap-2 p-2">
                 {/* Weight */}
@@ -733,7 +844,9 @@ export function InputForm({
                               type="number"
                               onChange={(e) => {
                                 const newOptions = [...options];
-                                newOptions[index].price = parseInt(e.target.value);
+                                newOptions[index].price = parseInt(
+                                  e.target.value
+                                );
                                 setOptions(newOptions);
                               }}
                             />

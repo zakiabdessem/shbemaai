@@ -13,3 +13,9 @@ export interface Option {
   quantity?: number;
   price: number;
 }
+
+export interface Business{
+  name: string
+  unit: number
+  price: number
+}

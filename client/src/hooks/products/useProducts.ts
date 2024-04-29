@@ -10,6 +10,7 @@ export interface Product {
   _id: string;
   description: string;
   name: string;
+  ruban: string;
   image: string | null | "";
   categories: {
     _id: string;
@@ -19,8 +20,11 @@ export interface Product {
   price: number;
   quantity: number;
   inStock: boolean;
-  business: number;
-  unit: number;
+  business: {
+    price: number;
+    unit: number;
+    name: string;
+  }[];
   weight: number;
   options: Option[];
   track: boolean;
@@ -39,6 +43,7 @@ const GET_DATA_PRODUCTS = gql`
       description
       name
       image
+      ruban
       categories {
         name
       }
@@ -69,6 +74,7 @@ const GET_DATA_PRODUCTS_BY_CATEGORY = gql`
       description
       name
       image
+      ruban
       categories {
         name
       }
@@ -89,12 +95,16 @@ const GET_DATA_PRODUCT = gql`
       name
       description
       image
+      ruban
       categories {
         _id
         name
       }
-      business
-      unit
+      business {
+        price
+        unit
+        name
+      }
       weight
       sku
       price
