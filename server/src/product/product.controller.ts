@@ -21,6 +21,11 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import * as _ from 'lodash';
 import { OrderService } from 'src/order/order.service';
 
+function isValidURL(url: string) {
+  const urlPattern = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
+  return urlPattern.test(url);
+}
+
 @Controller('product')
 export class ProductController {
   constructor(
@@ -47,10 +52,12 @@ export class ProductController {
           .json({ message: 'Categories are required' });
 
       // Upload main product image
-      const { url } = await this.cloudinaryService.uploadImage(
-        createProductDto.image,
-      );
-      createProductDto.image = url;
+      if (!isValidURL(createProductDto.image)) {
+        const { url } = await this.cloudinaryService.uploadImage(
+          createProductDto.image,
+        );
+        createProductDto.image = url;
+      }
 
       const newProduct = new this.productModel(createProductDto);
 
@@ -91,7 +98,8 @@ export class ProductController {
 
       return res.status(HttpStatus.OK).json({ data: newProduct });
     } catch (error) {
-      Logger.error(error);
+      console.error('errorrrr', error);
+
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Internal server error',
       });
@@ -110,7 +118,8 @@ export class ProductController {
       // Upload main product image
       if (
         editProductDto.image &&
-        !editProductDto.image.includes('cloudinary')
+        !editProductDto.image.includes('cloudinary') &&
+        !isValidURL(editProductDto.image)
       ) {
         const { url } = await this.cloudinaryService.uploadImage(
           editProductDto.image,

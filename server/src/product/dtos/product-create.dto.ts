@@ -10,6 +10,20 @@ import {
 import { Option } from '../product.schema';
 import mongoose, { Types } from 'mongoose';
 
+export class Business {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  price: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  unit: number;
+}
+
 export class ProductCreateDto {
   _id: string;
   @IsString()
@@ -29,12 +43,7 @@ export class ProductCreateDto {
   price: number;
 
   @IsOptional()
-  @IsNumber()
-  business?: number;
-
-  @IsOptional()
-  @IsNumber()
-  unit?: number;
+  business: Business[];
 
   @IsOptional()
   @IsNumber()

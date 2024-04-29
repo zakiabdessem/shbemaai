@@ -52,6 +52,26 @@ export class Option {
   track?: boolean;
 }
 
+@ObjectType('business')
+export class Business {
+  @Field()
+  @Prop()
+  name: string;
+
+  @Field()
+  @Prop({
+    required: false,
+    default: 0,
+  })
+  unit: number;
+
+  @Field()
+  @Prop({
+    required: false,
+  })
+  price: number;
+}
+
 // TODO: SHOW IN BUSSINESS OR STORE BUTTON
 
 @ObjectType('Product')
@@ -71,6 +91,10 @@ export class Product {
   @Field({ nullable: true })
   @Prop()
   description: string;
+
+  @Field({ nullable: true })
+  @Prop()
+  ruban: string;
 
   @Field({ nullable: true })
   @Prop()
@@ -127,17 +151,12 @@ export class Product {
   })
   promote: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => [Business], { nullable: true })
   @Prop({
+    type: [Business],
     required: false,
   })
-  business: number;
-
-  @Field({ nullable: true })
-  @Prop({
-    required: false,
-  })
-  unit: number;
+  business: Business[];
 
   @Prop({
     required: false,
@@ -145,7 +164,6 @@ export class Product {
     ref: 'Category',
   })
   categories: (Types.ObjectId | string)[];
-
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
