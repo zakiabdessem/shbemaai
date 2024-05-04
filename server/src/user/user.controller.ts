@@ -42,7 +42,27 @@ export class UserController {
           'Vous avez enregistré avec succès, attendez que nous vous contacter.',
       });
     } catch (error) {
-      console.log(error);
+      //console.log(error);
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        statusCode: HttpStatus.UNAUTHORIZED,
+        message: 'Authentication failed',
+      });
+    }
+  }
+
+  @Post('register/client')
+  async registerClient(
+    @Body() createUserDto: UserCreateDto,
+    @Res() res: Response,
+  ) {
+    try {
+      await this.userService.createUser(createUserDto);
+
+      return res.status(HttpStatus.OK).json({
+        message: 'Vous avez enregistré avec succès.',
+      });
+    } catch (error) {
+      //console.log(error);
       return res.status(HttpStatus.UNAUTHORIZED).json({
         statusCode: HttpStatus.UNAUTHORIZED,
         message: 'Authentication failed',
@@ -64,11 +84,12 @@ export class UserController {
           .json({ message: 'Invalid credentials' });
 
       const token = await sign(user, process.env.SECRET);
+      delete user.password;
 
       return res
         .cookie('jwt', token, cookieConfig())
         .status(HttpStatus.OK)
-        .json({ message: 'Auth Success', token });
+        .json({ message: 'Auth Success', token, user });
     } catch (error) {
       Logger.error(error);
       return res.status(HttpStatus.UNAUTHORIZED).json({
@@ -83,10 +104,12 @@ export class UserController {
     try {
       const decoded = req.decodedToken;
 
-      const User = await this.userService.findOneById(decoded._id);
-      if (!User) return res.status(404).json({ auth: false });
+      const user = await this.userService.findOneById(decoded._id);
+      if (!user) return res.status(404).json({ auth: false });
 
-      return res.status(HttpStatus.OK).json({ message: 'Auth Success' });
+      delete user.password;
+
+      return res.status(HttpStatus.OK).json({ message: 'Auth Success', user });
     } catch (error) {
       Logger.error(error);
       return res.status(HttpStatus.UNAUTHORIZED).json({

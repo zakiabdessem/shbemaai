@@ -9,6 +9,7 @@ import { UserRole } from 'src/decorator/role.entity';
 import { ROLES_KEY } from 'src/decorator/roles.decorator';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { verify } from 'jsonwebtoken';
+import { IRequest } from 'src/interface';
 
 @Injectable()
 export class GQLRolesGuard implements CanActivate {
@@ -43,7 +44,7 @@ export class GQLRolesGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      return false
+      return false;
     }
   }
 }

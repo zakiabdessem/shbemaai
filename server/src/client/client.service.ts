@@ -12,6 +12,20 @@ export class ClientService {
   ) {}
 
   async create(clientCreateDto: ClientCreateDto): Promise<Types.ObjectId> {
+    const client = await this.clientModel.findOne({
+      email: clientCreateDto.email,
+    });
+
+    if (client) {
+      client.address.address = clientCreateDto.address.address;
+      client.address.willaya = clientCreateDto.address.city;
+      client.address.commun = clientCreateDto.address.state;
+
+      await client.save();
+
+      return client._id;
+    }
+
     const newClient = await this.clientModel.create(clientCreateDto);
     return newClient._id;
   }
@@ -33,5 +47,10 @@ export class ClientService {
     const clientIds = clients.map((client) => client._id);
 
     return clientIds;
+  }
+
+  async findOneByEmail(email: string) {
+    const address = await this.clientModel.findOne({ email });
+    return address;
   }
 }

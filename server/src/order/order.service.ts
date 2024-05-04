@@ -106,6 +106,19 @@ export class OrderService {
     return this.orderModel.estimatedDocumentCount() || 0;
   }
 
+  async findByClient(email) {
+    const client = await this.clientService.findOneByEmail(email);
+    if (!client) return;
+
+    const orders = await this.orderModel
+      .find({ client: client._id })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return orders;
+  }
+
   checkIfOrderExpired(createdAt: Date) {
     const expireDate = new Date(createdAt);
     expireDate.setDate(expireDate.getDate() + 1);

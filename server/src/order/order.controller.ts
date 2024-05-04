@@ -5,11 +5,12 @@ import {
   HttpStatus,
   Inject,
   Post,
+  Req,
   Res,
   Session,
   forwardRef,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import {
   OrderCreateDtoBussiness,
   OrderCreateDtoClient,
@@ -81,6 +82,7 @@ export class OrderController {
   async create(
     @Session() session: Record<string, any>,
     @Body() orderCreateDto: OrderCreateDtoClient,
+    @Req() req: Request,
     @Res() res: Response,
   ) {
     if (!session.cart || session.cart?.products?.length < 1) {
@@ -99,6 +101,10 @@ export class OrderController {
       //     message: 'Order already created',
       //   });
       // }
+
+      const decoded = req.decodedToken || null;
+
+      console.log(decoded);
 
       //! Check willaya and address yalidine user
       const createdOrder = await this.orderService.createClient(

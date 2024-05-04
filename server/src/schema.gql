@@ -88,6 +88,7 @@ type Query {
   coupons: [Coupon!]!
   newerProducts: [Product!]!
   orders(page: Float!, searchQuery: String!): [Order!]!
+  ordersByClient(email: String!): [Order!]!
   product(id: String!): Product!
   products(page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
   productsByCategories(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
@@ -98,6 +99,7 @@ type Query {
 
 type User {
   _id: ID
+  client: Client
   email: String!
   firstName: String!
   lastName: String!

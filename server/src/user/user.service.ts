@@ -10,10 +10,15 @@ export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async createUser(createUserDto: UserCreateDto): Promise<User> {
-    return new this.userModel({
+    const newUser = new this.userModel({
       ...createUserDto,
       password: await hash(createUserDto.password, 10),
+      pending: false,
+      role: 'client',
     });
+    newUser.save();
+
+    return newUser;
   }
 
   async createUserPending(createUserDto: UserCreateDto): Promise<User> {
@@ -63,5 +68,9 @@ export class UserService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async findOneAndUpdate(userId, toUpdate) {
+    return await this.userModel.findByIdAndUpdate(userId, toUpdate);
   }
 }
