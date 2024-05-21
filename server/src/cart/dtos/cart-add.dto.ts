@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -18,6 +19,10 @@ export class CartAddDto {
   @IsNotEmpty()
   @IsNumber()
   quantity: number;
+
+  @IsOptional()
+  @IsBoolean()
+  business?: boolean;
 }
 
 export class CartDeleteDto {

@@ -28,9 +28,29 @@ export class OrderService {
   }
 
   async createBussiness(
-    OrderCreateDto: OrderCreateDtoBussiness,
+    orderCreateDto: OrderCreateDtoBussiness,
   ): Promise<Order> {
-    const newOrder = new this.orderModel(OrderCreateDto);
+    const newOrder = new this.orderModel({
+      cart: {
+        products: [
+          {
+            product: orderCreateDto.product,
+            options: {
+              name: orderCreateDto.option,
+              quantity: orderCreateDto.quantity
+            },
+          },
+        ],
+        note: orderCreateDto.note,
+        subTotal: orderCreateDto.price,
+        totalPrice: orderCreateDto.price,
+        discountedPrice: 0,
+        discountPercentage: 0,
+      },
+      client: await this.clientService.create(orderCreateDto.client),
+      paymentType: 'Cash',
+      isBusiness: true,
+    });
     return newOrder.save();
   }
 

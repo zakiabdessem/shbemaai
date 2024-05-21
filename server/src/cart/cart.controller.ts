@@ -70,11 +70,8 @@ export class CartController {
       if (!addCouponDto.code || addCouponDto.code === '')
         throw new Error('Le code promo est requis');
 
-      const coupon = await this.couponService.findOne(
-        addCouponDto.code,
-      );
-      if (!coupon)
-        throw new Error('Coupon introuvable ou pas actif');
+      const coupon = await this.couponService.findOne(addCouponDto.code);
+      if (!coupon) throw new Error('Coupon introuvable ou pas actif');
 
       if (session.cart?.coupon == coupon._id) {
         throw new Error('Un coupon est déjà appliqué');
@@ -125,6 +122,25 @@ export class CartController {
       if (!product.show) {
         throw new Error('Product not for sale');
       }
+
+      // if (addCartDto.business) {
+      //   Object.assign(
+      //     session.cart.bussiness,
+      //     await this.calculateTotalCart(session.cart.bussiness),
+      //   );
+
+      //   session.cart.bussiness.products.push({
+      //     product: addCartDto.product,
+      //     options: addCartDto.option
+      //       ? [{ name: addCartDto.option, quantity: addCartDto.quantity }]
+      //       : [],
+      //     quantity: addCartDto.option ? 0 : addCartDto.quantity,
+      //   });
+
+      //   return res.status(HttpStatus.ACCEPTED).json({
+      //     message: 'Product added',
+      //   });
+      // }
 
       // Initial check for product option validity
       let productOption;

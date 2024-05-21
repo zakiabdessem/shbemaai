@@ -102,10 +102,6 @@ export class OrderController {
       //   });
       // }
 
-      const decoded = req.decodedToken || null;
-
-      console.log(decoded);
-
       //! Check willaya and address yalidine user
       const createdOrder = await this.orderService.createClient(
         orderCreateDto,
@@ -147,6 +143,31 @@ export class OrderController {
         ...(orderCreateDto.paymentType == 'cib' && {
           url: Object.values(url).join(''),
         }),
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(HttpStatus.BAD_REQUEST).json({
+        message:
+          'Une erreur est apparue, veuillez changer le mode de paiement pour Cash.',
+      });
+    }
+  }
+
+  @Post('client/bussiness')
+  async createBussiness(
+    @Session() session: Record<string, any>,
+    @Body() orderCreateDto: OrderCreateDtoBussiness,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    try {
+      //! Check willaya and address yalidine user
+      const createdOrder = await this.orderService.createBussiness(
+        orderCreateDto
+      );
+
+      return res.status(HttpStatus.CREATED).json({
+        message: 'Order created successfully',
       });
     } catch (error) {
       console.error(error);

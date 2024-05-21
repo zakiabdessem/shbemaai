@@ -57,6 +57,30 @@ export class ProductResolver {
   }
 
   @Query(() => [Product])
+  async products_bussiness(
+    @Args('sortBy') sortBy: string,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
+  ): Promise<Product[]> {
+    return this.productService.findAll(sortBy, page, searchQuery);
+  }
+
+  @Query(() => [Product])
+  async productsBussinessByCategories(
+    @Args('categoryId') categoryId: string,
+    @Args('sortBy') sortBy: string,
+    @Args('page') page: number,
+    @Args('searchQuery') searchQuery: string,
+  ): Promise<Product[]> {
+    return await this.productService.findAllByCategoriesId(
+      categoryId,
+      sortBy,
+      page,
+      searchQuery,
+    );
+  }
+
+  @Query(() => [Product])
   async relevantProducts(): Promise<Product[]> {
     return this.productService.findRelevant();
   }

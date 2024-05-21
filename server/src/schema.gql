@@ -57,6 +57,7 @@ type Order {
   checkoutId: String
   client: Client
   createdAt: DateTime
+  isBussiness: Boolean
   isStopDesk: Boolean
   orderNumber: Float
   orderStatus: String
@@ -91,8 +92,10 @@ type Query {
   ordersByClient(email: String!): [Order!]!
   product(id: String!): Product!
   products(page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
+  productsBussinessByCategories(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
   productsByCategories(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
   productsByCategory(categoryId: String!, page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
+  products_bussiness(page: Float!, searchQuery: String!, sortBy: String!): [Product!]!
   relevantProducts: [Product!]!
   users: [User!]!
 }

@@ -150,6 +150,13 @@ export class Order {
 
   @Field({ nullable: true })
   @Prop({
+    required: false,
+    type: Boolean,
+  })
+  isBussiness?: boolean;
+
+  @Field({ nullable: true })
+  @Prop({
     required: true,
     type: Boolean,
   })

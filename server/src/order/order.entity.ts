@@ -11,6 +11,10 @@ export enum PaymentType {
   CIB = 'cib',
 }
 
+export enum PaymentTypeBussiness {
+  CASH = 'cash',
+}
+
 export enum OrderType {
   CLIENT = 'client',
   BUSSINESS = 'bussiness',
