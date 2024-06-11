@@ -8,11 +8,6 @@ const ACCEPTED_IMAGE_MIME_TYPES = [
   "image/webp",
 ];
 
-const fileSchema = z.object({
-  size: z.number(),
-  type: z.string(),
-});
-
 const imageSchema = z.union([
   z
     .any()

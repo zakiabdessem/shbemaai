@@ -1,8 +1,8 @@
-import Layout from "../Layout";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import Layout from '../Layout';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,25 +11,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import React, { useEffect, useState } from "react";
-import { PlusIcon, InfoIcon, CircleX, Plus, Trash } from "lucide-react";
+} from '@/components/ui/popover';
+import React, { useEffect, useState } from 'react';
+import { PlusIcon, InfoIcon, CircleX, Plus, Trash } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogClose,
@@ -39,31 +39,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Checkbox } from "@/components/ui/checkbox";
-import useCategories from "@/hooks/categories/useCategories";
-import { useCreateProduct } from "@/hooks/products/useCreateProduct";
-import { useDispatch } from "@/redux/hooks";
-import { Category, Option } from "@/types/product";
-import { Dispatch } from "redux";
-import { TitlePage } from "@/components/PageTitle";
-import { FormSchema } from "@/validator/product";
-import { toast } from "react-toastify";
+} from '@/components/ui/tooltip';
+import { Checkbox } from '@/components/ui/checkbox';
+import useCategories from '@/hooks/categories/useCategories';
+import { useCreateProduct } from '@/hooks/products/useCreateProduct';
+import { useDispatch } from '@/redux/hooks';
+import { Category, Option } from '@/types/product';
+import { Dispatch } from 'redux';
+import { TitlePage } from '@/components/PageTitle';
+import { FormSchema } from '@/validator/product';
+import { toast } from 'react-toastify';
 import {
   Table,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { capitalize } from "lodash";
-import { isValidURL } from "@/validator/url";
+} from '@/components/ui/table';
+import { capitalize } from 'lodash';
+import { isValidURL } from '@/validator/url';
 
 function CreateProduct() {
   const dispatch = useDispatch();
@@ -73,7 +73,7 @@ function CreateProduct() {
   const [show, setShow] = useState(true);
   const [promote, setPromote] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState('');
 
   return (
     <Layout>
@@ -105,7 +105,8 @@ function CreateProduct() {
                 />
                 <label
                   htmlFor="show"
-                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Show in store
                 </label>
               </div>
@@ -117,7 +118,8 @@ function CreateProduct() {
                 />
                 <label
                   htmlFor="promote"
-                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Promote this product
                 </label>
               </div>
@@ -132,7 +134,8 @@ function CreateProduct() {
                 <Checkbox id="show" checked disabled />
                 <label
                   htmlFor="show"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   All Categories
                 </label>
               </div>
@@ -143,7 +146,7 @@ function CreateProduct() {
                     onClick={() => {
                       if (categories.includes(category._id)) {
                         setCategories(
-                          categories.filter((c) => c !== category._id)
+                          categories.filter((c) => c !== category._id),
                         );
                       } else {
                         setCategories([...categories, category._id]);
@@ -152,7 +155,8 @@ function CreateProduct() {
                   />
                   <label
                     htmlFor={category._id}
-                    className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
                     {capitalize(category.name)}
                   </label>
                 </div>
@@ -190,7 +194,7 @@ export function InputForm({
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const [trackInv, setTrackinv] = useState(false);
-  const [stockStatus, setStockStatus] = useState("inStock");
+  const [stockStatus, setStockStatus] = useState('inStock');
 
   const [options, setOptions] = useState<Option[]>([]);
 
@@ -198,7 +202,7 @@ export function InputForm({
     setOptions([
       ...options,
       {
-        name: "",
+        name: '',
         image: null,
         changed: false,
         track: false,
@@ -213,28 +217,28 @@ export function InputForm({
   const form = useForm({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: "",
-      description: "",
-      image: "",
+      name: '',
+      description: '',
+      image: '',
       price: 0,
-      ruban: "",
+      ruban: '',
       unit: 10,
       weight: 0,
-      sku: "",
+      sku: '',
       quantity: 0,
       inStock: false,
       business: [
         {
           price: 0,
           unit: 0,
-          name: "",
+          name: '',
         },
       ],
     },
   });
 
   const optionsPreview = options.map((option) => {
-    if (typeof option.image === "string") {
+    if (typeof option.image === 'string') {
       return option;
     }
     // If option.image is a File, create a new object URL
@@ -256,9 +260,9 @@ export function InputForm({
   };
 
   function onSubmit(data: any) {
-    console.log("data", data);
+    console.log('data', data);
     dispatch({
-      type: "APP_SET_LOADING",
+      type: 'APP_SET_LOADING',
     });
 
     Object.assign(data, {
@@ -274,9 +278,9 @@ export function InputForm({
     // Filter options with non-empty names
     if (options) {
       options.forEach((option, index) => {
-        if (option.name === "" || option.image === null || option.price === 0) {
+        if (option.name === '' || option.image === null || option.price === 0) {
           toast.error(`Option ${index + 1} cannot be empty`, {
-            position: "bottom-right",
+            position: 'bottom-right',
           });
           proceed = false;
           return;
@@ -285,23 +289,23 @@ export function InputForm({
 
       if (!proceed) {
         dispatch({
-          type: "APP_CLEAR_LOADING",
+          type: 'APP_CLEAR_LOADING',
         });
         return;
       }
 
-      data.options = options.filter((option) => option.name !== "");
+      data.options = options.filter((option) => option.name !== '');
     }
 
     // Set inStock property based on trackInv and stockStatus
     if (!trackInv) {
-      data.inStock = stockStatus === "inStock";
+      data.inStock = stockStatus === 'inStock';
     }
 
     // Process the main image
 
     const processMainImage = new Promise((resolve) => {
-      if (!isValidURL(form.watch("image"))) {
+      if (!isValidURL(form.watch('image'))) {
         const reader = new FileReader();
         reader.onload = function (event) {
           data.image = event?.target?.result;
@@ -323,12 +327,12 @@ export function InputForm({
             resolve(true); // Resolve after setting option image
           };
           optionReader.onerror = function (error) {
-            console.error("Error reading file:", error);
+            console.error('Error reading file:', error);
             resolve(false); // Resolve as false or handle error appropriately
           };
           optionReader.readAsDataURL(option.image);
         } else {
-          console.warn("option.image is not a Blob or File", option.image);
+          console.warn('option.image is not a Blob or File', option.image);
           resolve(true); // Resolve directly if no image or not a Blob/File
         }
       });
@@ -343,7 +347,7 @@ export function InputForm({
   useEffect(() => {
     return () => {
       options.forEach((option) => {
-        if (typeof option.image === "string") {
+        if (typeof option.image === 'string') {
           URL.revokeObjectURL(option.image);
         }
       });
@@ -351,20 +355,20 @@ export function InputForm({
   }, [options]);
 
   const handleAddCollisage = () => {
-    form.setValue("business", [
-      ...form.watch("business"),
+    form.setValue('business', [
+      ...form.watch('business'),
       {
         price: 0,
         unit: 0,
-        name: "",
+        name: '',
       },
     ]);
   };
 
   const handleRemoveCollisage = (item: number) => {
     form.setValue(
-      "business",
-      form.watch("business").filter((_, index) => index !== item)
+      'business',
+      form.watch('business').filter((_, index) => index !== item),
     );
   };
 
@@ -453,12 +457,13 @@ export function InputForm({
 
                             <label
                               htmlFor="fileInput"
-                              className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center">
+                              className=" text-neutral-90  rounded-md cursor-pointer inline-flex items-center"
+                            >
                               <span className="whitespace-nowrap">
                                 {selectedImage?.name &&
-                                !isValidURL(form.watch("image"))
+                                !isValidURL(form.watch('image'))
                                   ? selectedImage?.name
-                                  : "choose your image"}
+                                  : 'choose your image'}
                               </span>
                             </label>
                           </Button>
@@ -492,11 +497,7 @@ export function InputForm({
                     <FormItem>
                       <FormLabel>Ruban</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="Ruban"
-                          maxLength={70}
-                          {...field}
-                        />
+                        <Input placeholder="Ruban" maxLength={70} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -525,8 +526,8 @@ export function InputForm({
                 </div>
 
                 <div className="flex flex-col gap-1 p-2">
-                  {form.watch("business").map((item, index) => (
-                    <React.Fragment key={index}>
+                  {form.watch('business').map((item, index) => (
+                    <React.Fragment key={index + item.price}>
                       <div className="flex gap-2">
                         <FormField
                           control={form.control}
@@ -563,13 +564,13 @@ export function InputForm({
                                   <div className="text-gray-700">
                                     Example
                                     <p>
-                                      Price:{" "}
+                                      Price:{' '}
                                       <span className="font-semibold">
                                         1000 DA
                                       </span>
                                     </p>
                                     <p>
-                                      Quantity:{" "}
+                                      Quantity:{' '}
                                       <span className="font-semibold">
                                         20 pieces
                                       </span>
@@ -613,7 +614,8 @@ export function InputForm({
                             type="button"
                             variant="ghost"
                             className="bg-red-500 ml-2"
-                            onClick={() => handleRemoveCollisage(index)}>
+                            onClick={() => handleRemoveCollisage(index)}
+                          >
                             <Trash className="text-white font-light w-8" />
                           </Button>
                         </div>
@@ -626,7 +628,8 @@ export function InputForm({
                 type="button"
                 variant="ghost"
                 className="bg-green-500 my-5 mb-2"
-                onClick={handleAddCollisage}>
+                onClick={handleAddCollisage}
+              >
                 <Plus className="text-white font-light w-16" />
               </Button>
 
@@ -687,7 +690,8 @@ export function InputForm({
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={"max-w-screen-lg overflow-y-scroll max-h-screen"}>
+                className={'max-w-screen-lg overflow-y-scroll max-h-screen'}
+              >
                 <DialogHeader>
                   <DialogTitle>Add product option</DialogTitle>
                   <DialogDescription>
@@ -711,10 +715,10 @@ export function InputForm({
                       if (optionWatch?.image instanceof File) {
                         try {
                           optionWatch.image = URL.createObjectURL(
-                            optionWatch.image
+                            optionWatch.image,
                           );
                         } catch (error) {
-                          console.error("Error creating object URL:", error);
+                          console.error('Error creating object URL:', error);
                         }
                       }
 
@@ -749,7 +753,7 @@ export function InputForm({
                                   if (e.target.files)
                                     handleOptionImageChange(
                                       index,
-                                      e.target.files[0]
+                                      e.target.files[0],
                                     );
                                 }}
                               />
@@ -759,22 +763,23 @@ export function InputForm({
                                   <TooltipTrigger>
                                     <label
                                       htmlFor={`fileInput-${index}`}
-                                      className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                                      className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center"
+                                    >
                                       {optionWatch?.image
-                                        ? "Change image"
-                                        : "Choose an image"}
+                                        ? 'Change image'
+                                        : 'Choose an image'}
                                     </label>
                                   </TooltipTrigger>
                                   {optionsPreview[index]?.image && (
                                     <TooltipContent>
                                       <img
                                         src={
-                                          optionWatch.image?.toString() || ""
+                                          optionWatch.image?.toString() || ''
                                         }
                                         alt="Option Preview"
                                         style={{
-                                          width: "120px",
-                                          height: "auto",
+                                          width: '120px',
+                                          height: 'auto',
                                         }}
                                       />
                                     </TooltipContent>
@@ -803,9 +808,10 @@ export function InputForm({
                                 onValueChange={(value) => {
                                   const newOptions = [...options];
                                   newOptions[index].inStock =
-                                    value === "inStock";
+                                    value === 'inStock';
                                   setOptions(newOptions);
-                                }}>
+                                }}
+                              >
                                 <SelectTrigger className="w-[180px]">
                                   <SelectValue placeholder="inStock" />
                                 </SelectTrigger>
@@ -845,7 +851,7 @@ export function InputForm({
                               onChange={(e) => {
                                 const newOptions = [...options];
                                 newOptions[index].price = parseInt(
-                                  e.target.value
+                                  e.target.value,
                                 );
                                 setOptions(newOptions);
                               }}
@@ -861,7 +867,8 @@ export function InputForm({
                                 const newOptions = [...options];
                                 newOptions.splice(index, 1);
                                 setOptions(newOptions);
-                              }}>
+                              }}
+                            >
                               <CircleX />
                             </Button>
                           </TableCell>

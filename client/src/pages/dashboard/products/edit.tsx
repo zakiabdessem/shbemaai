@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
-import Layout from "../Layout";
-import { useDispatch } from "@/redux/hooks";
-import useCategories from "@/hooks/categories/useCategories";
-import { TitlePage } from "@/components/PageTitle";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import React, { useEffect, useRef, useState } from 'react';
+import Layout from '../Layout';
+import { useDispatch } from '@/redux/hooks';
+import useCategories from '@/hooks/categories/useCategories';
+import { TitlePage } from '@/components/PageTitle';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogClose,
@@ -14,20 +14,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Dispatch } from "redux";
-import { Category, Option } from "@/types/product";
-import { useForm } from "react-hook-form";
+} from '@/components/ui/select';
+import { Dispatch } from 'redux';
+import { Category, Option } from '@/types/product';
+import { useForm } from 'react-hook-form';
 import {
   Form,
   FormControl,
@@ -36,27 +36,27 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { CircleX, InfoIcon, Plus, PlusIcon, Trash } from "lucide-react";
-import { Product, useProduct } from "@/hooks/products/useProducts";
-import { useNavigate, useParams } from "react-router-dom";
-import { MAIN_DASHBOARD_URL } from "@/app/constants";
-import { useEditProduct } from "@/hooks/products/useEditProduct";
-import { toast } from "react-toastify";
+} from '@/components/ui/popover';
+import { CircleX, InfoIcon, Plus, PlusIcon, Trash } from 'lucide-react';
+import { Product, useProduct } from '@/hooks/products/useProducts';
+import { useNavigate, useParams } from 'react-router-dom';
+import { MAIN_DASHBOARD_URL } from '@/app/constants';
+import { useEditProduct } from '@/hooks/products/useEditProduct';
+import { toast } from 'react-toastify';
 import {
   Table,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { capitalize } from "lodash";
+} from '@/components/ui/table';
+import { capitalize } from 'lodash';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,8 +67,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { instance } from "@/app/axios";
+} from '@/components/ui/alert-dialog';
+import { instance } from '@/app/axios';
 
 function EditProduct() {
   const dispatch = useDispatch();
@@ -78,10 +78,10 @@ function EditProduct() {
   const [show, setShow] = useState(true);
   const [promote, setPromote] = useState(false);
   const [categories, setCategories] = useState<string[]>([]);
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState('');
   const [providedOptions, setProvidedOptions] = useState<Option[]>();
 
-  const { id = "" } = useParams();
+  const { id = '' } = useParams();
   const navigate = useNavigate();
   const dataProduct = useProduct(id);
   const [product, setProduct] = useState<Product>();
@@ -103,7 +103,7 @@ function EditProduct() {
   useEffect(() => {
     if (dataCategory) {
       const categoriesSelected = dataProduct?.categories.map(
-        (c: Category) => c._id
+        (c: Category) => c._id,
       );
       setCategories(categoriesSelected);
     }
@@ -142,7 +142,8 @@ function EditProduct() {
                 />
                 <label
                   htmlFor="show"
-                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Show in store
                 </label>
               </div>
@@ -154,7 +155,8 @@ function EditProduct() {
                 />
                 <label
                   htmlFor="promote"
-                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   Promote this product
                 </label>
               </div>
@@ -169,7 +171,8 @@ function EditProduct() {
                 <Checkbox id="show" checked disabled />
                 <label
                   htmlFor="show"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
                   All Categories
                 </label>
               </div>
@@ -179,26 +182,28 @@ function EditProduct() {
                 dataCategory?.map((category: Category) => (
                   <div
                     className="flex items-center space-x-1"
-                    key={category._id}>
+                    key={category._id}
+                  >
                     <Checkbox
                       id={category._id}
-                      checked={categories.includes(category._id ?? "")}
+                      checked={categories.includes(category._id ?? '')}
                       onClick={() => {
                         const isCategorySelected = categories.includes(
-                          category._id ?? ""
+                          category._id ?? '',
                         );
                         setCategories((currentCategories: any) =>
                           isCategorySelected
                             ? currentCategories.filter(
-                                (id: string) => id !== category._id
+                                (id: string) => id !== category._id,
                               )
-                            : [...currentCategories, category._id]
+                            : [...currentCategories, category._id],
                         );
                       }}
                     />
                     <label
                       htmlFor={category._id}
-                      className="cursor-pointer text-sm font-medium leading-none">
+                      className="cursor-pointer text-sm font-medium leading-none"
+                    >
                       {capitalize(category.name)}
                     </label>
                   </div>
@@ -206,7 +211,7 @@ function EditProduct() {
               <Input
                 type="text"
                 placeholder="Add new category"
-                value={category || ""}
+                value={category || ''}
                 onChange={(e) => setCategory(e.target.value)}
                 maxLength={70}
               />
@@ -242,14 +247,14 @@ export function InputForm({
   const editProductMutation = useEditProduct();
 
   const [selectedImage, setSelectedImage] = useState<File | string | null>(
-    product?.image ?? null
+    product?.image ?? null,
   );
-  const [stockStatus, setStockStatus] = useState("inStock");
+  const [stockStatus, setStockStatus] = useState('inStock');
   const [trackInv, setTrackinv] = useState(false);
 
   useEffect(() => {
     setSelectedImage(product?.image ?? null);
-    setStockStatus(!product?.inStock ? "outStock" : "inStock");
+    setStockStatus(!product?.inStock ? 'outStock' : 'inStock');
     setTrackinv(product?.track ?? false);
   }, [product]);
 
@@ -259,7 +264,7 @@ export function InputForm({
     setOptions([
       ...options,
       {
-        name: "",
+        name: '',
         image: null,
         changed: false,
         track: false,
@@ -273,20 +278,20 @@ export function InputForm({
 
   const form = useForm({
     defaultValues: {
-      name: "",
-      description: "",
-      ruban: "",
-      image: null || "",
+      name: '',
+      description: '',
+      ruban: '',
+      image: null || '',
       price: 0,
       business: [
         {
           price: 0,
           unit: 0,
-          name: "",
+          name: '',
         },
       ],
       weight: 0,
-      sku: "",
+      sku: '',
       quantity: 0,
       inStock: false,
     },
@@ -303,7 +308,7 @@ export function InputForm({
   };
 
   function onSubmit(data: any) {
-    dispatch({ type: "APP_SET_LOADING" });
+    dispatch({ type: 'APP_SET_LOADING' });
 
     Object.assign(data, {
       show,
@@ -318,9 +323,9 @@ export function InputForm({
     // Filter options with non-empty names
     if (options) {
       options.forEach((option, index) => {
-        if (option.name === "" || option.image === null || option.price === 0) {
+        if (option.name === '' || option.image === null || option.price === 0) {
           toast.error(`Option ${index + 1} cannot be empty`, {
-            position: "bottom-right",
+            position: 'bottom-right',
           });
           proceed = false;
           return;
@@ -329,17 +334,17 @@ export function InputForm({
 
       if (!proceed) {
         dispatch({
-          type: "APP_CLEAR_LOADING",
+          type: 'APP_CLEAR_LOADING',
         });
         return;
       }
 
-      data.options = options.filter((option) => option.name !== "");
+      data.options = options.filter((option) => option.name !== '');
     }
 
     // Set inStock property
     if (!trackInv) {
-      data.inStock = stockStatus === "inStock";
+      data.inStock = stockStatus === 'inStock';
     }
 
     // Handle the main image and option images uploading
@@ -347,7 +352,7 @@ export function InputForm({
       .then(() => {
         return editProductMutation.mutateAsync(data);
       })
-      .catch((error) => console.error("Error processing images:", error));
+      .catch((error) => console.error('Error processing images:', error));
   }
 
   async function handleImageUpload(data: any) {
@@ -360,7 +365,7 @@ export function InputForm({
         if (option.changed && option.image) {
           option.image = await readFileAsDataURL(option.image);
         }
-      })
+      }),
     );
   }
 
@@ -400,8 +405,8 @@ export function InputForm({
       optionsPreviews?.forEach((option) => {
         if (
           option.image &&
-          typeof option.image === "string" &&
-          option.image.startsWith("blob:")
+          typeof option.image === 'string' &&
+          option.image.startsWith('blob:')
         ) {
           URL.revokeObjectURL(option.image);
         }
@@ -411,52 +416,52 @@ export function InputForm({
 
   const handleDeleteProduct = async () => {
     await instance
-      .post("product/delete", {
+      .post('product/delete', {
         id: product?._id.toString(),
       })
       .then(() => {
         toast.success(
           `Product have order cannot be deleted just unshow it from Sotre`,
           {
-            position: "bottom-right",
+            position: 'bottom-right',
             autoClose: 3000,
             hideProgressBar: false,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,
             progress: undefined,
-          }
+          },
         );
       })
       .then(() => navigate(`${MAIN_DASHBOARD_URL}/products`))
       .catch((error) =>
         toast.error(`Error ${error.response.data.message}`, {
-          position: "bottom-right",
+          position: 'bottom-right',
           autoClose: 3000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
           progress: undefined,
-        })
+        }),
       );
   };
 
   const handleAddCollisage = () => {
-    form.setValue("business", [
-      ...form.watch("business"),
+    form.setValue('business', [
+      ...form.watch('business'),
       {
         price: 0,
         unit: 0,
-        name: "",
+        name: '',
       },
     ]);
   };
 
   const handleRemoveCollisage = (item: number) => {
     form.setValue(
-      "business",
-      form.watch("business").filter((_, index) => index !== item)
+      'business',
+      form.watch('business').filter((_, index) => index !== item),
     );
   };
 
@@ -561,11 +566,12 @@ export function InputForm({
 
                             <label
                               htmlFor="fileInput"
-                              className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center">
+                              className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center"
+                            >
                               <span className="whitespace-nowrap">
                                 {selectedImage instanceof File
                                   ? selectedImage.name
-                                  : "choose your image"}
+                                  : 'choose your image'}
                               </span>
                             </label>
                           </Button>
@@ -582,7 +588,6 @@ export function InputForm({
                           <Input
                             type="text"
                             placeholder="https://example.com/"
-                            {...field}
                           />
                         </FormControl>
                       </FormItem>
@@ -612,8 +617,8 @@ export function InputForm({
                 </div>
 
                 <div className="flex flex-col gap-1 p-2">
-                  {form.watch("business").map((item, index) => (
-                    <React.Fragment key={index}>
+                  {form.watch('business').map((item, index) => (
+                    <React.Fragment key={index + item.price}>
                       <div className="flex gap-2">
                         <FormField
                           control={form.control}
@@ -650,13 +655,13 @@ export function InputForm({
                                   <div className="text-gray-700">
                                     Example
                                     <p>
-                                      Price:{" "}
+                                      Price:{' '}
                                       <span className="font-semibold">
                                         1000 DA
                                       </span>
                                     </p>
                                     <p>
-                                      Quantity:{" "}
+                                      Quantity:{' '}
                                       <span className="font-semibold">
                                         20 pieces
                                       </span>
@@ -700,7 +705,8 @@ export function InputForm({
                             type="button"
                             variant="ghost"
                             className="bg-red-500 ml-2"
-                            onClick={() => handleRemoveCollisage(index)}>
+                            onClick={() => handleRemoveCollisage(index)}
+                          >
                             <Trash className="text-white font-light w-8" />
                           </Button>
                         </div>
@@ -713,7 +719,8 @@ export function InputForm({
                 type="button"
                 variant="ghost"
                 className="bg-green-500 my-5 mb-2"
-                onClick={handleAddCollisage}>
+                onClick={handleAddCollisage}
+              >
                 <Plus className="text-white font-light w-16" />
               </Button>
 
@@ -774,7 +781,8 @@ export function InputForm({
                 </Button>
               </DialogTrigger>
               <DialogContent
-                className={"max-w-screen-lg overflow-y-scroll max-h-screen"}>
+                className={'max-w-screen-lg overflow-y-scroll max-h-screen'}
+              >
                 <DialogHeader>
                   <DialogTitle>Add product option</DialogTitle>
                   <DialogDescription>
@@ -800,10 +808,10 @@ export function InputForm({
                         optionsPreview &&
                         options.map((item, index) => {
                           // Create a URL for the preview image if needed
-                          let previewImageUrl = "";
+                          let previewImageUrl = '';
                           if (item.image instanceof File) {
                             previewImageUrl = URL.createObjectURL(item.image);
-                          } else if (typeof item.image === "string") {
+                          } else if (typeof item.image === 'string') {
                             previewImageUrl = item.image;
                           }
 
@@ -830,10 +838,11 @@ export function InputForm({
                               <TableCell>
                                 <label
                                   htmlFor={`fileInput-${index}`}
-                                  className="cursor-pointer whitespace-nowrap">
+                                  className="cursor-pointer whitespace-nowrap"
+                                >
                                   {previewImageUrl
-                                    ? "Change image"
-                                    : "Choose an image"}
+                                    ? 'Change image'
+                                    : 'Choose an image'}
                                 </label>
                                 <input
                                   type="file"
@@ -843,7 +852,7 @@ export function InputForm({
                                     if (e.target.files) {
                                       handleOptionImageChange(
                                         index,
-                                        e.target.files[0]
+                                        e.target.files[0],
                                       );
                                     }
                                   }}
@@ -852,7 +861,7 @@ export function InputForm({
                                   <img
                                     src={previewImageUrl}
                                     alt="Option Preview"
-                                    style={{ width: "80px", height: "80px" }}
+                                    style={{ width: '80px', height: '80px' }}
                                   />
                                 )}
                               </TableCell>
@@ -866,7 +875,7 @@ export function InputForm({
                                           return { ...opt, track: !opt.track };
                                         }
                                         return opt;
-                                      }
+                                      },
                                     );
                                     setOptions(updatedOptions);
                                   }}
@@ -889,7 +898,7 @@ export function InputForm({
                                 ) : (
                                   <Select
                                     value={
-                                      item.inStock ? "inStock" : "outStock"
+                                      item.inStock ? 'inStock' : 'outStock'
                                     }
                                     onValueChange={(value) => {
                                       const updatedOptions = options.map(
@@ -897,14 +906,15 @@ export function InputForm({
                                           if (optIndex === index) {
                                             return {
                                               ...opt,
-                                              inStock: value === "inStock",
+                                              inStock: value === 'inStock',
                                             };
                                           }
                                           return opt;
-                                        }
+                                        },
                                       );
                                       setOptions(updatedOptions);
-                                    }}>
+                                    }}
+                                  >
                                     <SelectTrigger className="w-[180px]">
                                       <SelectValue />
                                     </SelectTrigger>
@@ -930,7 +940,7 @@ export function InputForm({
                                   onChange={(e) => {
                                     const newOptions = [...options];
                                     newOptions[index].price = parseInt(
-                                      e.target.value
+                                      e.target.value,
                                     );
                                     setOptions(newOptions);
                                   }}
@@ -944,7 +954,8 @@ export function InputForm({
                                     const newOptions = [...options];
                                     newOptions.splice(index, 1);
                                     setOptions(newOptions);
-                                  }}>
+                                  }}
+                                >
                                   <CircleX />
                                 </Button>
                               </TableCell>
@@ -985,7 +996,8 @@ export function InputForm({
               <div className="p-2">
                 <Select
                   value={stockStatus}
-                  onValueChange={(value) => setStockStatus(value)}>
+                  onValueChange={(value) => setStockStatus(value)}
+                >
                   <Label>Status</Label>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="inStock" />
