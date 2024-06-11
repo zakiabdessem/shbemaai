@@ -21,7 +21,9 @@ async function bootstrap() {
       'http://localhost:3000',
       'https://chebani-da795b3063b6.herokuapp.com',
       'http://chebani-da795b3063b6.herokuapp.com',
-      /.*\.herokuapp\.com$/
+      /.*\.herokuapp\.com$/,
+       /.*\.vercel\.app$/,
+       "https://shbemaai.vercel.app/"
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
