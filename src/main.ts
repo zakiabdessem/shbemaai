@@ -18,13 +18,14 @@ async function bootstrap() {
       /.*\.chebaani\.com$/, // Match origins ending with chebaani.com
       'http://localhost:3001',
       'http://localhost:3000',
+      'https://chebani-da795b3063b6.herokuapp.com',
+      /.*\.herokuapp\.com$/
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
     credentials: true,
   };
-  
 
   app.enableCors(options);
   app.use(cookieParser());
