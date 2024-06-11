@@ -3,7 +3,7 @@ function cookieConfig() {
       httpOnly: true,
       sameSite: 'strict' as const,
       secure: process.env.NODE_ENV === 'production',
-      domain: process.env.NODE_ENV === 'production' ? `.${process.env.COOKIE_URL}` : 'localhost',
+      domain: process.env.NODE_ENV === 'production' ? `${process.env.COOKIE_URL}` : 'localhost',
     };
   }
   
