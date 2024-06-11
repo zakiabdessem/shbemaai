@@ -16,6 +16,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       /.*\.chebaani\.com$/, // Match origins ending with chebaani.com
+      "chebani-da795b3063b6.herokuapp.com",
       'http://localhost:3001',
       'http://localhost:3000',
       'https://chebani-da795b3063b6.herokuapp.com',
