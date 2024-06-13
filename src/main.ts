@@ -23,7 +23,7 @@ async function bootstrap() {
       'http://chebani-da795b3063b6.herokuapp.com',
       /.*\.herokuapp\.com$/,
       /.*\.vercel\.app$/,
-      'https://shbemaai.vercel.app',
+      'https://testings.software',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
