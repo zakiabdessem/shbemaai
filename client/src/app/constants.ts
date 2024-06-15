@@ -1,6 +1,6 @@
 export const ASSETS_BASE_URL = `/assets`;
 
-export const API_URL = `${import.meta.env.VITE_API_URL}`;
+export const API_URL = `https://api.testings.software`;
 
 export const MAIN_WEBSITE_URL = `/`;
 
