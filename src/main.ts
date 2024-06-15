@@ -24,6 +24,8 @@ async function bootstrap() {
       /.*\.herokuapp\.com$/,
       /.*\.vercel\.app$/,
       'https://testings.software',
+      "https://www.testings.software",
+      "https://admin.testings.software"
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
